@@ -1,86 +1,98 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Building2, Target, Users, BarChart3, CheckSquare, Calendar } from "lucide-react";
-
-const eosOverview = [
-  {
-    title: "Vision/Traction Organizer",
-    status: "Jour",
-    progress: 100,
-    description: "Vision 10 ans, 3 ans et 1 an définie"
-  },
-  {
-    title: "People (Organigramme)",
-    status: "En cours",
-    progress: 85,
-    description: "Structure équipe et responsabilités"
-  },
-  {
-    title: "Data (Scorecard)",
-    status: "Jour",
-    progress: 95,
-    description: "Métriques hebdomadaires trackées"
-  },
-  {
-    title: "Issues (Problèmes)",
-    status: "Attention",
-    progress: 60,
-    description: "7 issues actives à résoudre"
-  },
-  {
-    title: "Process (SOP)",
-    status: "En cours",
-    progress: 75,
-    description: "Processus documentés et suivis"
-  },
-  {
-    title: "Traction (Rocks)",
-    status: "En cours",
-    progress: 60,
-    description: "Rocks Q3: 3/5 en progression"
-  }
-];
-
-const currentRocks = [
-  {
-    title: "Implémenter CRM unifié",
-    owner: "Marie Dubois",
-    deadline: "2025-03-31",
-    progress: 85,
-    status: "En cours"
-  },
-  {
-    title: "Automatiser reporting client",
-    owner: "Jean Martin",
-    deadline: "2025-03-31",
-    progress: 40,
-    status: "En retard"
-  },
-  {
-    title: "Former équipe montage",
-    owner: "Sarah Johnson",
-    deadline: "2025-03-15",
-    progress: 70,
-    status: "En cours"
-  },
-  {
-    title: "Optimiser pipeline vidéo",
-    owner: "Marc Tremblay",
-    deadline: "2025-03-31",
-    progress: 90,
-    status: "Presque fini"
-  },
-  {
-    title: "Développer offre premium",
-    owner: "Maxime Giguère",
-    deadline: "2025-03-31",
-    progress: 25,
-    status: "À risque"
-  }
-];
+import { Button } from "@/components/ui/button";
+import { Building2, Target, Users, BarChart3, CheckSquare, Calendar, Plus, AlertTriangle } from "lucide-react";
+import { useEOSIssues, useEOSRocks, useEOSKPIs } from "@/hooks/useEOS";
+import { EmptyState } from "@/components/common/EmptyState";
+import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
 
 const EOS = () => {
+  const navigate = useNavigate();
+  const { data: issues = [], isLoading: issuesLoading } = useEOSIssues();
+  const { data: rocks = [], isLoading: rocksLoading } = useEOSRocks();
+  const { data: kpis = [], isLoading: kpisLoading } = useEOSKPIs();
+
+  // Calculate EOS component status based on real data
+  const eosOverview = useMemo(() => {
+    const activeIssues = issues.filter(issue => issue.status === 'open');
+    const completedRocks = rocks.filter(rock => rock.status === 'completed');
+    const activeKPIs = kpis.length;
+
+    return [
+      {
+        title: "Vision/Traction Organizer",
+        status: "Jour",
+        progress: 100,
+        description: "Vision 10 ans, 3 ans et 1 an définie",
+        action: () => navigate('/eos')
+      },
+      {
+        title: "People (Organigramme)", 
+        status: "En cours",
+        progress: 85,
+        description: "Structure équipe et responsabilités",
+        action: () => navigate('/eos')
+      },
+      {
+        title: "Data (Scorecard)",
+        status: activeKPIs > 0 ? "Jour" : "À configurer",
+        progress: activeKPIs > 0 ? 95 : 0,
+        description: `${activeKPIs} KPI${activeKPIs > 1 ? 's' : ''} configuré${activeKPIs > 1 ? 's' : ''}`,
+        action: () => navigate('/eos/scorecard')
+      },
+      {
+        title: "Issues (Problèmes)",
+        status: activeIssues.length > 7 ? "Attention" : activeIssues.length > 0 ? "En cours" : "Jour",
+        progress: activeIssues.length === 0 ? 100 : Math.max(0, 100 - (activeIssues.length * 10)),
+        description: `${activeIssues.length} issue${activeIssues.length > 1 ? 's' : ''} active${activeIssues.length > 1 ? 's' : ''}`,
+        action: () => navigate('/eos/issues')
+      },
+      {
+        title: "Process (SOP)",
+        status: "En cours",
+        progress: 75,
+        description: "Processus documentés et suivis",
+        action: () => navigate('/eos')
+      },
+      {
+        title: "Traction (Rocks)",
+        status: rocks.length > 0 ? "En cours" : "À configurer",
+        progress: rocks.length > 0 ? Math.round((completedRocks.length / rocks.length) * 100) : 0,
+        description: `${completedRocks.length}/${rocks.length} rocks complétés`,
+        action: () => navigate('/eos/rocks')
+      }
+    ];
+  }, [issues, rocks, kpis, navigate]);
+
+  if (issuesLoading || rocksLoading || kpisLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">EOS Model Dashboard</h1>
+            <p className="text-muted-foreground">Chargement...</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Card key={index} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-2 bg-muted rounded w-full mb-2"></div>
+                <div className="h-3 bg-muted rounded w-1/2"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -89,15 +101,21 @@ const EOS = () => {
           <h1 className="text-3xl font-bold text-foreground">EOS Model Dashboard</h1>
           <p className="text-muted-foreground">Entrepreneurial Operating System - Vue d'ensemble</p>
         </div>
-        <Badge className="bg-success text-success-foreground text-lg px-4 py-2">
-          EOS Implementé
-        </Badge>
+        <div className="flex gap-2">
+          <Badge className="bg-success text-success-foreground text-lg px-4 py-2">
+            EOS Implementé
+          </Badge>
+          <Button onClick={() => navigate('/eos/meetings')} variant="outline">
+            <Calendar className="h-4 w-4 mr-2" />
+            Level 10 Meeting
+          </Button>
+        </div>
       </div>
 
       {/* EOS Components Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {eosOverview.map((component, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
+          <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={component.action}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{component.title}</CardTitle>
@@ -129,47 +147,77 @@ const EOS = () => {
       {/* Current Quarter Rocks */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-primary" />
-            Rocks Q1 2025 (Objectifs Trimestriels)
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Rocks Actifs (Objectifs Trimestriels)
+            </CardTitle>
+            <Button onClick={() => navigate('/eos/rocks')} variant="outline" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Gérer les Rocks
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {currentRocks.map((rock, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold">{rock.title}</h4>
-                  <Badge 
-                    variant={
-                      rock.status === "Presque fini" ? "default" :
-                      rock.status === "En retard" || rock.status === "À risque" ? "destructive" : "secondary"
-                    }
-                    className={rock.status === "Presque fini" ? "bg-success text-success-foreground" : ""}
-                  >
-                    {rock.status}
-                  </Badge>
+          {rocks.length === 0 ? (
+            <EmptyState
+              icon={Target}
+              title="Aucun Rock défini"
+              description="Créez vos premiers objectifs trimestriels pour commencer à utiliser le système EOS."
+              action={
+                <Button onClick={() => navigate('/eos/rocks')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Créer un Rock
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-4">
+              {rocks.slice(0, 5).map((rock) => (
+                <div key={rock.id} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold">{rock.title}</h4>
+                    <Badge 
+                      variant={
+                        rock.status === "completed" ? "default" :
+                        rock.status === "at_risk" ? "destructive" : "secondary"
+                      }
+                      className={rock.status === "completed" ? "bg-success text-success-foreground" : ""}
+                    >
+                      {rock.status === "completed" ? "Complété" :
+                       rock.status === "at_risk" ? "À risque" :
+                       rock.status === "on_track" ? "En cours" : "Non démarré"}
+                    </Badge>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Propriétaire: </span>
+                      <span className="font-medium">{rock.owner_id || 'Non assigné'}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Échéance: </span>
+                      <span className="font-medium">{rock.due_date || 'Non définie'}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Progression: </span>
+                      <span className="font-medium">{rock.progress}%</span>
+                    </div>
+                  </div>
+                  
+                  <Progress value={rock.progress} />
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Responsable: </span>
-                    <span className="font-medium">{rock.owner}</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Échéance: </span>
-                    <span className="font-medium">{rock.deadline}</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Progression: </span>
-                    <span className="font-medium">{rock.progress}%</span>
-                  </div>
+              ))}
+              
+              {rocks.length > 5 && (
+                <div className="text-center pt-4">
+                  <Button variant="outline" onClick={() => navigate('/eos/rocks')}>
+                    Voir tous les rocks ({rocks.length})
+                  </Button>
                 </div>
-                
-                <Progress value={rock.progress} />
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -189,40 +237,80 @@ const EOS = () => {
             </div>
             
             <div className="space-y-2">
-              <h5 className="font-semibold">Agenda</h5>
+              <h5 className="font-semibold">Agenda EOS Standard</h5>
               <div className="text-sm space-y-1">
+                <div>✓ Segue (5 min)</div>
                 <div>✓ Scorecard Review (5 min)</div>
                 <div>✓ Rock Review (5 min)</div>
                 <div>✓ Customer/Employee Headlines (5 min)</div>
-                <div>• IDS (Issues-Identify-Discuss-Solve) (75 min)</div>
+                <div>• To-do List (5 min)</div>
+                <div>• IDS (Issues-Identify-Discuss-Solve) (60 min)</div>
                 <div>• Conclude (5 min)</div>
               </div>
             </div>
+
+            <Button onClick={() => navigate('/eos/meetings')} className="w-full">
+              <Calendar className="h-4 w-4 mr-2" />
+              Gérer les Meetings
+            </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckSquare className="h-5 w-5 text-primary" />
-              Issues Prioritaires
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <CheckSquare className="h-5 w-5 text-primary" />
+                Issues Prioritaires
+              </CardTitle>
+              <Button onClick={() => navigate('/eos/issues')} variant="outline" size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Gérer
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="border-l-4 border-l-destructive p-3 bg-destructive/5">
-                <h5 className="font-semibold text-destructive">Urgent</h5>
-                <p className="text-sm">Retard livraison créa Élite Protection</p>
+            {issues.length === 0 ? (
+              <EmptyState
+                icon={CheckSquare}
+                title="Aucune issue active"
+                description="Aucun problème en cours. Parfait !"
+                action={
+                  <Button onClick={() => navigate('/eos/issues')} variant="outline">
+                    Voir toutes les issues
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="space-y-3">
+                {issues.slice(0, 3).map((issue) => (
+                  <div key={issue.id} className={`border-l-4 p-3 ${
+                    issue.priority >= 8 ? 'border-l-destructive bg-destructive/5' :
+                    issue.priority >= 5 ? 'border-l-warning bg-warning/5' :
+                    'border-l-info bg-info/5'
+                  }`}>
+                    <h5 className={`font-semibold ${
+                      issue.priority >= 8 ? 'text-destructive' :
+                      issue.priority >= 5 ? 'text-warning' :
+                      'text-info'
+                    }`}>
+                      {issue.priority >= 8 ? 'Urgent' :
+                       issue.priority >= 5 ? 'Important' :
+                       'À planifier'}
+                    </h5>
+                    <p className="text-sm">{issue.title}</p>
+                  </div>
+                ))}
+                
+                {issues.length > 3 && (
+                  <div className="text-center pt-2">
+                    <Button variant="outline" size="sm" onClick={() => navigate('/eos/issues')}>
+                      Voir toutes les issues ({issues.length})
+                    </Button>
+                  </div>
+                )}
               </div>
-              <div className="border-l-4 border-l-warning p-3 bg-warning/5">
-                <h5 className="font-semibold text-warning">Important</h5>
-                <p className="text-sm">Quota vidéo TechnoMax menacé</p>
-              </div>
-              <div className="border-l-4 border-l-info p-3 bg-info/5">
-                <h5 className="font-semibold text-info">À planifier</h5>
-                <p className="text-sm">Formation équipe montage</p>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -230,30 +318,42 @@ const EOS = () => {
       {/* Scorecard Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Scorecard Hebdomadaire
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              Scorecard Hebdomadaire
+            </CardTitle>
+            <Button onClick={() => navigate('/eos/scorecard')} variant="outline" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Configurer KPIs
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-success">85%</div>
-              <div className="text-sm text-muted-foreground">Satisfaction Client</div>
+          {kpis.length === 0 ? (
+            <EmptyState
+              icon={BarChart3}
+              title="Scorecard non configuré"
+              description="Configurez vos KPIs pour suivre les métriques hebdomadaires de votre entreprise."
+              action={
+                <Button onClick={() => navigate('/eos/scorecard')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Configurer le Scorecard
+                </Button>
+              }
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {kpis.slice(0, 4).map((kpi) => (
+                <div key={kpi.id} className="text-center p-4 border rounded-lg">
+                  <div className="text-2xl font-bold text-foreground">
+                    {kpi.target || 'N/A'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">{kpi.name}</div>
+                </div>
+              ))}
             </div>
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-warning">60%</div>
-              <div className="text-sm text-muted-foreground">Quota Vidéos</div>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-info">3.2x</div>
-              <div className="text-sm text-muted-foreground">ROAS Moyen</div>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-success">92%</div>
-              <div className="text-sm text-muted-foreground">Tâches Complétées</div>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -1,9 +1,22 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { AlertTriangle, Users, Video, Target, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Users, Video, Target, Calendar, Plus } from "lucide-react";
+import { useEOSIssues, useEOSRocks, useEOSKPIs } from "@/hooks/useEOS";
+import { EmptyState } from "@/components/common/EmptyState";
+import { useNavigate } from "react-router-dom";
 
 export function DashboardSections() {
+  const navigate = useNavigate();
+  const { data: issues = [] } = useEOSIssues();
+  const { data: rocks = [] } = useEOSRocks();
+  const { data: kpis = [] } = useEOSKPIs();
+
+  const activeIssues = issues.filter(issue => issue.status === 'open');
+  const completedRocks = rocks.filter(rock => rock.status === 'completed');
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Gestion Clients */}
@@ -14,30 +27,17 @@ export function DashboardSections() {
             Gestion Clients
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold">Élite Protection</h4>
-              <Badge className="bg-success text-success-foreground">En cours</Badge>
-            </div>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>📈 Reach: +20% cette semaine</p>
-              <p>🎥 Vidéos: 7/12 publiées</p>
-              <p>💰 ROAS: 3.2x</p>
-            </div>
-          </div>
-          
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold">TechnoMax</h4>
-              <Badge variant="destructive">Attention</Badge>
-            </div>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>⚠️ CPC +35% vs semaine passée</p>
-              <p>🎥 Vidéos: 4/12 publiées</p>
-              <p>💰 ROAS: 2.1x</p>
-            </div>
-          </div>
+        <CardContent>
+          <EmptyState
+            icon={Users}
+            title="Aucun client configuré"
+            description="Connectez vos données clients pour voir les statistiques en temps réel."
+            action={
+              <Button onClick={() => navigate('/clients')} variant="outline">
+                Configurer les clients
+              </Button>
+            }
+          />
         </CardContent>
       </Card>
 
@@ -49,33 +49,17 @@ export function DashboardSections() {
             Production Vidéos
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Quota mensuel global</span>
-              <span className="font-semibold">87/144</span>
-            </div>
-            <Progress value={60} />
-            
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Scripts prêts:</span>
-                <span className="ml-2 font-semibold">23</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">En montage:</span>
-                <span className="ml-2 font-semibold">12</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Tournage:</span>
-                <span className="ml-2 font-semibold">8</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Publiées:</span>
-                <span className="ml-2 font-semibold text-foreground">87</span>
-              </div>
-            </div>
-          </div>
+        <CardContent>
+          <EmptyState
+            icon={Video}
+            title="Production non configurée"
+            description="Configurez vos workflows de production vidéo."
+            action={
+              <Button onClick={() => navigate('/videos')} variant="outline">
+                Configurer la production
+              </Button>
+            }
+          />
         </CardContent>
       </Card>
 
@@ -87,31 +71,17 @@ export function DashboardSections() {
             Performance Ads
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-3 border border-success/20 rounded-lg">
-              <div className="text-xl font-bold text-foreground">$1.20</div>
-              <div className="text-xs text-muted-foreground">CPC Moyen</div>
-            </div>
-            <div className="text-center p-3 border border-warning/20 rounded-lg">
-              <div className="text-xl font-bold text-foreground">$4.50</div>
-              <div className="text-xs text-muted-foreground">CPL Moyen</div>
-            </div>
-          </div>
-          
-          <div className="border-t pt-4">
-            <h5 className="font-semibold mb-2">Alertes Automatiques</h5>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <AlertTriangle className="h-4 w-4 text-destructive" />
-                TechnoMax: CPC +35%
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <AlertTriangle className="h-4 w-4 text-warning" />
-                Budget Resto Plus: 90% dépensé
-              </div>
-            </div>
-          </div>
+        <CardContent>
+          <EmptyState
+            icon={Target}
+            title="Publicités non configurées"
+            description="Connectez vos comptes publicitaires pour suivre les performances."
+            action={
+              <Button onClick={() => navigate('/ads')} variant="outline">
+                Configurer les ads
+              </Button>
+            }
+          />
         </CardContent>
       </Card>
 
@@ -126,26 +96,40 @@ export function DashboardSections() {
         <CardContent className="space-y-4">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm">Vision/Traction Organizer</span>
-              <Badge className="bg-success text-success-foreground">Jour</Badge>
+              <span className="text-sm">Issues Actives</span>
+              <Badge variant={activeIssues.length > 0 ? "destructive" : "default"}>
+                {activeIssues.length}
+              </Badge>
             </div>
             
             <div className="flex items-center justify-between">
-              <span className="text-sm">Rocks Q3 Progress</span>
-              <span className="text-sm font-semibold">3/5 ✅</span>
+              <span className="text-sm">Rocks Complétés</span>
+              <span className="text-sm font-semibold">
+                {completedRocks.length}/{rocks.length}
+              </span>
             </div>
             
             <div className="flex items-center justify-between">
-              <span className="text-sm">Level 10 Meetings</span>
-              <span className="text-sm text-muted-foreground">Lun 9h00</span>
+              <span className="text-sm">KPIs Configurés</span>
+              <span className="text-sm font-semibold">{kpis.length}</span>
             </div>
             
-            <div className="border-t pt-3">
-              <h5 className="font-semibold mb-2 text-sm">Issues à Résoudre</h5>
-              <div className="space-y-1 text-xs">
-                <div>• Retard livraison créa Élite Protection</div>
-                <div>• Quota vidéo TechnoMax menacé</div>
-                <div>• Formation équipe montage</div>
+            <div className="border-t pt-3 space-y-2">
+              <Button onClick={() => navigate('/eos')} className="w-full" size="sm">
+                <Building2 className="h-4 w-4 mr-2" />
+                Voir le Dashboard EOS
+              </Button>
+              
+              <div className="grid grid-cols-3 gap-2">
+                <Button onClick={() => navigate('/eos/issues')} variant="outline" size="sm">
+                  Issues
+                </Button>
+                <Button onClick={() => navigate('/eos/rocks')} variant="outline" size="sm">
+                  Rocks
+                </Button>
+                <Button onClick={() => navigate('/eos/scorecard')} variant="outline" size="sm">
+                  KPIs
+                </Button>
               </div>
             </div>
           </div>
