@@ -80,7 +80,7 @@ export interface EOSMeeting {
   updated_at: string;
 }
 
-// Issues hooks
+// Issues hooks with optimizations
 export const useEOSIssues = () => {
   return useQuery({
     queryKey: ['eos-issues'],
@@ -94,7 +94,11 @@ export const useEOSIssues = () => {
       
       if (error) throw error;
       return data as EOSIssue[];
-    }
+    },
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
+    refetchInterval: 60 * 1000, // 1 minute auto-refresh for real-time updates
   });
 };
 
@@ -112,11 +116,32 @@ export const useCreateIssue = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onMutate: async (newIssue) => {
+      // Optimistic updates
+      await queryClient.cancelQueries({ queryKey: ['eos-issues'] });
+      const previousIssues = queryClient.getQueryData<EOSIssue[]>(['eos-issues']);
+      
+      if (previousIssues) {
+        const optimisticIssue: EOSIssue = {
+          ...newIssue,
+          id: `temp-${Date.now()}`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        queryClient.setQueryData(['eos-issues'], [...previousIssues, optimisticIssue]);
+      }
+      
+      return { previousIssues };
+    },
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['eos-issues'] });
       toast({ title: "Issue créée avec succès" });
     },
-    onError: (error) => {
+    onError: (error, newIssue, context) => {
+      // Rollback optimistic update
+      if (context?.previousIssues) {
+        queryClient.setQueryData(['eos-issues'], context.previousIssues);
+      }
       console.error('Create issue error:', error);
       toast({ 
         title: "Erreur lors de la création", 
@@ -156,7 +181,7 @@ export const useUpdateIssue = () => {
   });
 };
 
-// Rocks hooks
+// Rocks hooks with optimizations
 export const useEOSRocks = () => {
   return useQuery({
     queryKey: ['eos-rocks'],
@@ -169,7 +194,10 @@ export const useEOSRocks = () => {
       
       if (error) throw error;
       return data as EOSRock[];
-    }
+    },
+    staleTime: 60 * 1000, // 1 minute (rocks change less frequently)
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -231,7 +259,7 @@ export const useUpdateRock = () => {
   });
 };
 
-// KPIs hooks
+// KPIs hooks with optimizations  
 export const useEOSKPIs = () => {
   return useQuery({
     queryKey: ['eos-kpis'],
@@ -245,7 +273,10 @@ export const useEOSKPIs = () => {
       
       if (error) throw error;
       return data as EOSKPI[];
-    }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes (KPIs are more stable)
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    refetchOnWindowFocus: false, // KPIs don't need frequent refetching
   });
 };
 
@@ -277,7 +308,7 @@ export const useCreateKPI = () => {
   });
 };
 
-// Todos hooks
+// Todos hooks with optimizations
 export const useEOSTodos = () => {
   return useQuery({
     queryKey: ['eos-todos'],
@@ -291,7 +322,10 @@ export const useEOSTodos = () => {
       
       if (error) throw error;
       return data as EOSTodo[];
-    }
+    },
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -323,7 +357,7 @@ export const useCreateTodo = () => {
   });
 };
 
-// Meetings hooks
+// Meetings hooks with optimizations
 export const useEOSMeetings = () => {
   return useQuery({
     queryKey: ['eos-meetings'],
@@ -343,7 +377,10 @@ export const useEOSMeetings = () => {
           minutes: number;
         }>
       })) as EOSMeeting[];
-    }
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: true,
   });
 };
 

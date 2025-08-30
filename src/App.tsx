@@ -18,7 +18,25 @@ const EOSIssues = lazy(() => import("./pages/EOSIssues"));
 const EOSRocks = lazy(() => import("./pages/EOSRocks"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+// Optimized QueryClient configuration
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30 * 1000, // 30 seconds default
+      gcTime: 5 * 60 * 1000, // 5 minutes default
+      refetchOnWindowFocus: false, // Reduce unnecessary refetches
+      retry: (failureCount, error: any) => {
+        // Smart retry logic
+        if (error?.status === 404) return false;
+        return failureCount < 2;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
 // Page loading skeleton
 const PageSkeleton = () => (

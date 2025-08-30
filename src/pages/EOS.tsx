@@ -7,13 +7,23 @@ import { Building2, Target, Users, BarChart3, CheckSquare, Calendar, Plus, Alert
 import { useEOSIssues, useEOSRocks, useEOSKPIs } from "@/hooks/useEOS";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useNavigate } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, memo, useCallback } from "react";
+import { OptimizedEOSCard } from "@/components/eos/OptimizedEOSCard";
+import { OptimizedRockCard } from "@/components/eos/OptimizedRockCard";
+import { OptimizedIssueCard } from "@/components/eos/OptimizedIssueCard";
 
-const EOS = () => {
+const EOS = memo(function EOS() {
   const navigate = useNavigate();
   const { data: issues = [], isLoading: issuesLoading } = useEOSIssues();
   const { data: rocks = [], isLoading: rocksLoading } = useEOSRocks();
   const { data: kpis = [], isLoading: kpisLoading } = useEOSKPIs();
+
+  // Memoized navigation callbacks to prevent unnecessary re-renders
+  const navigateToEOS = useCallback(() => navigate('/eos'), [navigate]);
+  const navigateToScorecard = useCallback(() => navigate('/eos/scorecard'), [navigate]);
+  const navigateToIssues = useCallback(() => navigate('/eos/issues'), [navigate]);
+  const navigateToRocks = useCallback(() => navigate('/eos/rocks'), [navigate]);
+  const navigateToMeetings = useCallback(() => navigate('/eos/meetings'), [navigate]);
 
   // Calculate EOS component status based on real data
   const eosOverview = useMemo(() => {
@@ -27,45 +37,45 @@ const EOS = () => {
         status: "Jour",
         progress: 100,
         description: "Vision 10 ans, 3 ans et 1 an définie",
-        action: () => navigate('/eos')
+        action: navigateToEOS
       },
       {
         title: "People (Organigramme)", 
         status: "En cours",
         progress: 85,
         description: "Structure équipe et responsabilités",
-        action: () => navigate('/eos')
+        action: navigateToEOS
       },
       {
         title: "Data (Scorecard)",
         status: activeKPIs > 0 ? "Jour" : "À configurer",
         progress: activeKPIs > 0 ? 95 : 0,
         description: `${activeKPIs} KPI${activeKPIs > 1 ? 's' : ''} configuré${activeKPIs > 1 ? 's' : ''}`,
-        action: () => navigate('/eos/scorecard')
+        action: navigateToScorecard
       },
       {
         title: "Issues (Problèmes)",
         status: activeIssues.length > 7 ? "Attention" : activeIssues.length > 0 ? "En cours" : "Jour",
         progress: activeIssues.length === 0 ? 100 : Math.max(0, 100 - (activeIssues.length * 10)),
         description: `${activeIssues.length} issue${activeIssues.length > 1 ? 's' : ''} active${activeIssues.length > 1 ? 's' : ''}`,
-        action: () => navigate('/eos/issues')
+        action: navigateToIssues
       },
       {
         title: "Process (SOP)",
         status: "En cours",
         progress: 75,
         description: "Processus documentés et suivis",
-        action: () => navigate('/eos')
+        action: navigateToEOS
       },
       {
         title: "Traction (Rocks)",
         status: rocks.length > 0 ? "En cours" : "À configurer",
         progress: rocks.length > 0 ? Math.round((completedRocks.length / rocks.length) * 100) : 0,
         description: `${completedRocks.length}/${rocks.length} rocks complétés`,
-        action: () => navigate('/eos/rocks')
+        action: navigateToRocks
       }
     ];
-  }, [issues, rocks, kpis, navigate]);
+  }, [issues, rocks, kpis, navigateToEOS, navigateToScorecard, navigateToIssues, navigateToRocks]);
 
   if (issuesLoading || rocksLoading || kpisLoading) {
     return (
@@ -105,42 +115,24 @@ const EOS = () => {
           <Badge className="bg-success text-success-foreground text-lg px-4 py-2">
             EOS Implementé
           </Badge>
-          <Button onClick={() => navigate('/eos/meetings')} variant="outline">
+          <Button onClick={navigateToMeetings} variant="outline">
             <Calendar className="h-4 w-4 mr-2" />
             Level 10 Meeting
-          </Button>
+            </Button>
         </div>
       </div>
 
       {/* EOS Components Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {eosOverview.map((component, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={component.action}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{component.title}</CardTitle>
-                <Badge 
-                  variant={
-                    component.status === "Jour" ? "default" : 
-                    component.status === "Attention" ? "destructive" : "secondary"
-                  }
-                  className={component.status === "Jour" ? "bg-success text-success-foreground" : ""}
-                >
-                  {component.status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Progression</span>
-                  <span>{component.progress}%</span>
-                </div>
-                <Progress value={component.progress} />
-              </div>
-              <p className="text-sm text-muted-foreground">{component.description}</p>
-            </CardContent>
-          </Card>
+          <OptimizedEOSCard
+            key={component.title}
+            title={component.title}
+            status={component.status}
+            progress={component.progress}
+            description={component.description}
+            onClick={component.action}
+          />
         ))}
       </div>
 
@@ -152,7 +144,7 @@ const EOS = () => {
               <Target className="h-5 w-5 text-primary" />
               Rocks Actifs (Objectifs Trimestriels)
             </CardTitle>
-            <Button onClick={() => navigate('/eos/rocks')} variant="outline" size="sm">
+            <Button onClick={navigateToRocks} variant="outline" size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Gérer les Rocks
             </Button>
@@ -166,50 +158,18 @@ const EOS = () => {
               description="Créez vos premiers objectifs trimestriels pour commencer à utiliser le système EOS."
               action={{
                 label: "Créer un Rock",
-                onClick: () => navigate('/eos/rocks')
+                onClick: navigateToRocks
               }}
             />
           ) : (
             <div className="space-y-4">
               {rocks.slice(0, 5).map((rock) => (
-                <div key={rock.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold">{rock.title}</h4>
-                    <Badge 
-                      variant={
-                        rock.status === "completed" ? "default" :
-                        rock.status === "at_risk" ? "destructive" : "secondary"
-                      }
-                      className={rock.status === "completed" ? "bg-success text-success-foreground" : ""}
-                    >
-                      {rock.status === "completed" ? "Complété" :
-                       rock.status === "at_risk" ? "À risque" :
-                       rock.status === "on_track" ? "En cours" : "Non démarré"}
-                    </Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Propriétaire: </span>
-                      <span className="font-medium">{rock.owner_id || 'Non assigné'}</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Échéance: </span>
-                      <span className="font-medium">{rock.due_date || 'Non définie'}</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Progression: </span>
-                      <span className="font-medium">{rock.progress}%</span>
-                    </div>
-                  </div>
-                  
-                  <Progress value={rock.progress} />
-                </div>
+                <OptimizedRockCard key={rock.id} rock={rock} />
               ))}
               
               {rocks.length > 5 && (
                 <div className="text-center pt-4">
-                  <Button variant="outline" onClick={() => navigate('/eos/rocks')}>
+                  <Button variant="outline" onClick={navigateToRocks}>
                     Voir tous les rocks ({rocks.length})
                   </Button>
                 </div>
@@ -247,7 +207,7 @@ const EOS = () => {
               </div>
             </div>
 
-            <Button onClick={() => navigate('/eos/meetings')} className="w-full">
+            <Button onClick={navigateToMeetings} className="w-full">
               <Calendar className="h-4 w-4 mr-2" />
               Gérer les Meetings
             </Button>
@@ -261,7 +221,7 @@ const EOS = () => {
                 <CheckSquare className="h-5 w-5 text-primary" />
                 Issues Prioritaires
               </CardTitle>
-              <Button onClick={() => navigate('/eos/issues')} variant="outline" size="sm">
+              <Button onClick={navigateToIssues} variant="outline" size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Gérer
               </Button>
@@ -275,33 +235,18 @@ const EOS = () => {
                 description="Aucun problème en cours. Parfait !"
                 action={{
                   label: "Voir toutes les issues",
-                  onClick: () => navigate('/eos/issues')
+                  onClick: navigateToIssues
                 }}
               />
             ) : (
               <div className="space-y-3">
                 {issues.slice(0, 3).map((issue) => (
-                  <div key={issue.id} className={`border-l-4 p-3 ${
-                    issue.priority >= 8 ? 'border-l-destructive bg-destructive/5' :
-                    issue.priority >= 5 ? 'border-l-warning bg-warning/5' :
-                    'border-l-info bg-info/5'
-                  }`}>
-                    <h5 className={`font-semibold ${
-                      issue.priority >= 8 ? 'text-destructive' :
-                      issue.priority >= 5 ? 'text-warning' :
-                      'text-info'
-                    }`}>
-                      {issue.priority >= 8 ? 'Urgent' :
-                       issue.priority >= 5 ? 'Important' :
-                       'À planifier'}
-                    </h5>
-                    <p className="text-sm">{issue.title}</p>
-                  </div>
+                  <OptimizedIssueCard key={issue.id} issue={issue} />
                 ))}
                 
                 {issues.length > 3 && (
                   <div className="text-center pt-2">
-                    <Button variant="outline" size="sm" onClick={() => navigate('/eos/issues')}>
+                    <Button variant="outline" size="sm" onClick={navigateToIssues}>
                       Voir toutes les issues ({issues.length})
                     </Button>
                   </div>
@@ -320,7 +265,7 @@ const EOS = () => {
               <BarChart3 className="h-5 w-5 text-primary" />
               Scorecard Hebdomadaire
             </CardTitle>
-            <Button onClick={() => navigate('/eos/scorecard')} variant="outline" size="sm">
+            <Button onClick={navigateToScorecard} variant="outline" size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Configurer KPIs
             </Button>
@@ -334,7 +279,7 @@ const EOS = () => {
               description="Configurez vos KPIs pour suivre les métriques hebdomadaires de votre entreprise."
               action={{
                 label: "Configurer le Scorecard",
-                onClick: () => navigate('/eos/scorecard')
+                onClick: navigateToScorecard
               }}
             />
           ) : (
@@ -353,6 +298,6 @@ const EOS = () => {
       </Card>
     </div>
   );
-};
+});
 
 export default EOS;
