@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function Recommendations() {
   return (
-    <Card className="border-l-4 border-l-primary motion-safe:animate-fade-in">
+    <Card className="border-l-2 border-l-primary/20 motion-safe:animate-fade-in">
       <CardHeader>
         <CardTitle className="text-primary">👉 Recommandations Prioritaires</CardTitle>
       </CardHeader>

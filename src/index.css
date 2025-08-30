@@ -8,52 +8,52 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
 
-    --primary: 221 83% 53%;
+    --primary: 240 5.9% 10%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 221 83% 53%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
 
-    /* ONE OS Custom Colors */
-    --success: 142 76% 36%;
+    /* ONE OS Custom Colors - simplified */
+    --success: 142 70% 45%;
     --success-foreground: 0 0% 98%;
     
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 9%;
+    --warning: 32 95% 44%;
+    --warning-foreground: 0 0% 98%;
     
-    --info: 199 89% 48%;
+    --info: 221 83% 53%;
     --info-foreground: 0 0% 98%;
     
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(221 83% 53%), hsl(221 83% 63%));
-    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 46%));
-    --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%), hsl(38 92% 60%));
+    /* Minimal gradients */
+    --gradient-primary: hsl(var(--primary));
+    --gradient-success: hsl(var(--success));
+    --gradient-warning: hsl(var(--warning));
     
-    /* Shadows */
-    --shadow-primary: 0 10px 30px -10px hsl(221 83% 53% / 0.3);
-    --shadow-elevated: 0 25px 50px -12px hsl(0 0% 0% / 0.25);
+    /* Subtle shadows */
+    --shadow-primary: 0 2px 8px -2px hsl(240 5.9% 10% / 0.1);
+    --shadow-elevated: 0 8px 25px -8px hsl(240 5.9% 10% / 0.15);
 
     --radius: 0.5rem;
 
@@ -75,35 +75,35 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 0 0% 98%;
-    --foreground: 240 10% 3.9%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
 
     --primary: 221 83% 53%;
-    --primary-foreground: 0 0% 98%;
+    --primary-foreground: 240 10% 3.9%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
     --ring: 221 83% 53%;
     
-    /* ONE OS Custom Colors Light Mode */
+    /* ONE OS Custom Colors Dark Mode */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 98%;
     

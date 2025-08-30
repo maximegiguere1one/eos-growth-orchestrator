@@ -15,11 +15,11 @@ interface StatCardProps {
 }
 
 const toneClasses = {
-  success: "border-l-success text-success",
-  warning: "border-l-warning text-warning", 
-  info: "border-l-info text-info",
-  destructive: "border-l-destructive text-destructive",
-  primary: "border-l-primary text-primary"
+  success: "border-l-2 border-l-success/20 text-success",
+  warning: "border-l-2 border-l-warning/20 text-warning", 
+  info: "border-l-2 border-l-info/20 text-info",
+  destructive: "border-l-2 border-l-destructive/20 text-destructive",
+  primary: "border-l-2 border-l-primary/20 text-primary"
 };
 
 export function StatCard({ 
@@ -34,7 +34,7 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <Card className={cn(
-      "border-l-4 motion-safe:animate-fade-in hover-scale",
+      "motion-safe:animate-fade-in hover-scale border-border/50",
       toneClasses[tone],
       className
     )}>

@@ -25,10 +25,10 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
             
             <div className="flex items-center gap-4">
-              <Badge variant="secondary" className="bg-success text-success-foreground">
+              <Badge variant="secondary" className="bg-muted text-muted-foreground">
                 Système Opérationnel
               </Badge>
-              <Button className="bg-gradient-primary text-primary-foreground hidden md:flex">
+              <Button variant="default" className="hidden md:flex">
                 Rapport Hebdo
               </Button>
             </div>
@@ -36,7 +36,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Mobile FAB */}
           <Button 
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg bg-gradient-primary text-primary-foreground md:hidden"
+            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg bg-primary text-primary-foreground md:hidden"
             aria-label="Actions rapides"
           >
             📊
