@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useEffect, useCallback } from 'react';
 
 // Types based on our Supabase schema
 export interface EOSIssue {
@@ -80,14 +81,16 @@ export interface EOSMeeting {
   updated_at: string;
 }
 
-// Issues hooks with optimizations
+// Issues hooks with realtime optimizations
 export const useEOSIssues = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  
+  const query = useQuery({
     queryKey: ['eos-issues'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('eos_issues')
-        .select('*')
+        .select('id, title, description, assigned_to, status, priority, resolved_at, archived_at, created_at, updated_at')
         .is('archived_at', null)
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false });
@@ -95,11 +98,34 @@ export const useEOSIssues = () => {
       if (error) throw error;
       return data as EOSIssue[];
     },
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000, // 1 minute auto-refresh for real-time updates
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false, // Disable polling since we have realtime
   });
+
+  // Setup realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('eos-issues-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'eos_issues'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['eos-issues'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return query;
 };
 
 export const useCreateIssue = () => {
@@ -181,24 +207,50 @@ export const useUpdateIssue = () => {
   });
 };
 
-// Rocks hooks with optimizations
+// Rocks hooks with realtime optimizations
 export const useEOSRocks = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  
+  const query = useQuery({
     queryKey: ['eos-rocks'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('eos_rocks')
-        .select('*')
+        .select('id, title, description, owner_id, start_date, due_date, progress, status, completed_at, archived_at, created_at, updated_at')
         .is('archived_at', null)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as EOSRock[];
     },
-    staleTime: 60 * 1000, // 1 minute (rocks change less frequently)
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes 
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    refetchOnWindowFocus: false,
   });
+
+  // Setup realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('eos-rocks-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'eos_rocks'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['eos-rocks'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return query;
 };
 
 export const useCreateRock = () => {
@@ -308,14 +360,16 @@ export const useCreateKPI = () => {
   });
 };
 
-// Todos hooks with optimizations
+// Todos hooks with realtime optimizations
 export const useEOSTodos = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  
+  const query = useQuery({
     queryKey: ['eos-todos'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('eos_todos')
-        .select('*')
+        .select('id, description, assigned_to, due_date, completed_at, archived_at, created_at, updated_at')
         .is('archived_at', null)
         .is('completed_at', null)
         .order('created_at', { ascending: false });
@@ -323,10 +377,34 @@ export const useEOSTodos = () => {
       if (error) throw error;
       return data as EOSTodo[];
     },
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 8 * 60 * 1000, // 8 minutes
+    refetchOnWindowFocus: false,
   });
+
+  // Setup realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('eos-todos-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'eos_todos'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['eos-todos'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return query;
 };
 
 export const useCreateTodo = () => {

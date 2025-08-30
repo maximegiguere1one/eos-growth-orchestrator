@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PerformanceProvider } from "@/components/performance/PerformanceProvider";
 import { Suspense, lazy } from "react";
 
 // Lazy load pages for better performance
@@ -60,21 +61,23 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AppLayout>
-          <Suspense fallback={<PageSkeleton />}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/clients" element={<Clients />} />
-              <Route path="/videos" element={<Videos />} />
-              <Route path="/ads" element={<Ads />} />
-              <Route path="/eos" element={<EOS />} />
-              <Route path="/eos/issues" element={<EOSIssues />} />
-              <Route path="/eos/rocks" element={<EOSRocks />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </AppLayout>
+        <PerformanceProvider>
+          <AppLayout>
+            <Suspense fallback={<PageSkeleton />}>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/clients" element={<Clients />} />
+                <Route path="/videos" element={<Videos />} />
+                <Route path="/ads" element={<Ads />} />
+                <Route path="/eos" element={<EOS />} />
+                <Route path="/eos/issues" element={<EOSIssues />} />
+                <Route path="/eos/rocks" element={<EOSRocks />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </AppLayout>
+        </PerformanceProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

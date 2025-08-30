@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Target, Plus, CheckCircle, AlertTriangle, Calendar } from "lucide-react";
-import { useEOSRocks, useCreateRock, useUpdateRock } from "@/hooks/useEOS";
+import { useEOSRocks, useCreateRock, useUpdateRock, EOSRock } from "@/hooks/useEOS";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Section } from "@/components/common/Section";
@@ -30,7 +30,7 @@ export default function EOSRocks() {
     status: 'not_started' as const
   });
 
-  const handleCreateRock = () => {
+  const handleCreateRock = useCallback(() => {
     createRock.mutate(newRock, {
       onSuccess: () => {
         setNewRock({
@@ -45,9 +45,9 @@ export default function EOSRocks() {
         setIsCreateOpen(false);
       }
     });
-  };
+  }, [createRock, newRock]);
 
-  const handleUpdateProgress = (rockId: string, progress: number, status?: string) => {
+  const handleUpdateProgress = useCallback((rockId: string, progress: number, status?: string) => {
     const updates: any = { id: rockId, progress };
     
     if (status) {
@@ -67,38 +67,47 @@ export default function EOSRocks() {
     }
     
     updateRock.mutate(updates);
-  };
+  }, [updateRock]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case 'completed': return 'default';
       case 'on_track': return 'secondary';
       case 'at_risk': return 'destructive';
       default: return 'outline';
     }
-  };
+  }, []);
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = useCallback((status: string) => {
     switch (status) {
       case 'completed': return 'Complété';
       case 'on_track': return 'En cours';
       case 'at_risk': return 'À risque';
       default: return 'Non démarré';
     }
-  };
+  }, []);
 
-  const calculateQuarterProgress = () => {
-    if (rocks.length === 0) return 0;
-    const totalProgress = rocks.reduce((sum, rock) => sum + rock.progress, 0);
-    return Math.round(totalProgress / rocks.length);
-  };
+  // Memoized calculations
+  const { sortedRocks, quarterStats, shouldShowAlert } = useMemo(() => {
+    const sorted = rocks.sort((a, b) => {
+      const statusOrder = { 'at_risk': 0, 'on_track': 1, 'not_started': 2, 'completed': 3 };
+      return statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder];
+    });
 
-  const isQuarterMidway = () => {
+    const progress = rocks.length === 0 ? 0 : Math.round(rocks.reduce((sum, rock) => sum + rock.progress, 0) / rocks.length);
+    const stats = {
+      total: rocks.length,
+      completed: rocks.filter(r => r.status === 'completed').length,
+      atRisk: rocks.filter(r => r.status === 'at_risk').length,
+      progress
+    };
+
     const now = new Date();
-    const currentMonth = now.getMonth();
-    // Simple quarter detection - can be improved
-    return currentMonth % 3 === 1; // Middle month of quarter
-  };
+    const isQuarterMidway = now.getMonth() % 3 === 1;
+    const alert = isQuarterMidway && progress < 50 && rocks.length > 0;
+
+    return { sortedRocks: sorted, quarterStats: stats, shouldShowAlert: alert };
+  }, [rocks]);
 
   if (isLoading) {
     return (
@@ -199,32 +208,32 @@ export default function EOSRocks() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-foreground">{rocks.length}</div>
+              <div className="text-2xl font-bold text-foreground">{quarterStats.total}</div>
               <div className="text-sm text-muted-foreground">Rocks Actifs</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{rocks.filter(r => r.status === 'completed').length}</div>
+              <div className="text-2xl font-bold text-green-600">{quarterStats.completed}</div>
               <div className="text-sm text-muted-foreground">Complétés</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">{rocks.filter(r => r.status === 'at_risk').length}</div>
+              <div className="text-2xl font-bold text-orange-600">{quarterStats.atRisk}</div>
               <div className="text-sm text-muted-foreground">À Risque</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-foreground">{calculateQuarterProgress()}%</div>
+              <div className="text-2xl font-bold text-foreground">{quarterStats.progress}%</div>
               <div className="text-sm text-muted-foreground">Progression Globale</div>
             </div>
           </div>
 
           {/* Quarter progress alert */}
-          {isQuarterMidway() && calculateQuarterProgress() < 50 && rocks.length > 0 && (
+          {shouldShowAlert && (
             <div className="mt-4 p-4 border border-orange-200 bg-orange-50 rounded-lg">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-orange-600" />
                 <span className="font-semibold text-orange-600">Alerte mi-trimestre</span>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                Vous êtes à mi-parcours du trimestre avec seulement {calculateQuarterProgress()}% de progression globale. 
+                Vous êtes à mi-parcours du trimestre avec seulement {quarterStats.progress}% de progression globale. 
                 Considérez revoir vos priorités ou ajuster vos objectifs.
               </p>
             </div>
@@ -244,13 +253,7 @@ export default function EOSRocks() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {rocks
-            .sort((a, b) => {
-              // Sort by status priority, then by due date
-              const statusOrder = { 'at_risk': 0, 'on_track': 1, 'not_started': 2, 'completed': 3 };
-              return statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder];
-            })
-            .map((rock) => (
+          {sortedRocks.map((rock) => (
               <Card key={rock.id}>
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between mb-4">
