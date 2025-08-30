@@ -437,12 +437,23 @@ export const useCreateTodo = () => {
 
 // Meetings hooks with optimizations
 export const useEOSMeetings = () => {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: ['eos-meetings'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('eos_meetings')
-        .select('*')
+        .select(`
+          id,
+          status,
+          started_at,
+          ended_at,
+          agenda,
+          created_at,
+          updated_at,
+          created_by
+        `)
         .is('archived_at', null)
         .order('created_at', { ascending: false });
       
@@ -456,9 +467,9 @@ export const useEOSMeetings = () => {
         }>
       })) as EOSMeeting[];
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: true,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -478,12 +489,41 @@ export const useCreateMeeting = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eos-meetings'] });
-      toast({ title: "Meeting créé avec succès" });
+      toast({ title: "Réunion créée avec succès" });
     },
     onError: (error) => {
       console.error('Create meeting error:', error);
       toast({ 
         title: "Erreur lors de la création", 
+        variant: "destructive" 
+      });
+    }
+  });
+};
+
+export const useUpdateMeeting = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<EOSMeeting> }) => {
+      const { data, error } = await supabase
+        .from('eos_meetings')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['eos-meetings'] });
+      toast({ title: "Réunion mise à jour avec succès" });
+    },
+    onError: (error) => {
+      console.error('Update meeting error:', error);
+      toast({ 
+        title: "Erreur lors de la mise à jour", 
         variant: "destructive" 
       });
     }

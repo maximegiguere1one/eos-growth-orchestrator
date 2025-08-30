@@ -17,6 +17,7 @@ const Ads = lazy(() => import("./pages/Ads"));
 const EOS = lazy(() => import("./pages/EOS"));
 const EOSIssues = lazy(() => import("./pages/EOSIssues"));
 const EOSRocks = lazy(() => import("./pages/EOSRocks"));
+const EOSMeetings = lazy(() => import("./pages/EOSMeetings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Optimized QueryClient configuration
@@ -72,6 +73,7 @@ const App = () => (
                 <Route path="/eos" element={<EOS />} />
                 <Route path="/eos/issues" element={<EOSIssues />} />
                 <Route path="/eos/rocks" element={<EOSRocks />} />
+                <Route path="/eos/meetings" element={<EOSMeetings />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
