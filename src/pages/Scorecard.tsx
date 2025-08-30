@@ -19,7 +19,7 @@ import { useEOSKPIs, useCreateKPI, useUpdateKPI, useKPIValuesForWeek, useUpsertK
 import { cn } from "@/lib/utils";
 import { format, startOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 
 const kpiFormSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
