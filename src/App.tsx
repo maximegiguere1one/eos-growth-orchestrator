@@ -18,6 +18,7 @@ const EOS = lazy(() => import("./pages/EOS"));
 const EOSIssues = lazy(() => import("./pages/EOSIssues"));
 const EOSRocks = lazy(() => import("./pages/EOSRocks"));
 const EOSMeetings = lazy(() => import("./pages/EOSMeetings"));
+const Scorecard = lazy(() => import("./pages/Scorecard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Optimized QueryClient configuration
@@ -73,7 +74,8 @@ const App = () => (
                 <Route path="/eos" element={<EOS />} />
                 <Route path="/eos/issues" element={<EOSIssues />} />
                 <Route path="/eos/rocks" element={<EOSRocks />} />
-                <Route path="/eos/meetings" element={<EOSMeetings />} />
+        <Route path="/eos/meetings" element={<EOSMeetings />} />
+        <Route path="/eos/scorecard" element={<Scorecard />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -360,6 +360,111 @@ export const useCreateKPI = () => {
   });
 };
 
+export const useUpdateKPI = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<EOSKPI> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('eos_kpis')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['eos-kpis'] });
+      queryClient.invalidateQueries({ queryKey: ['eos-kpi-values'] });
+      toast({ title: "KPI mis à jour avec succès" });
+    },
+    onError: (error) => {
+      console.error('Update KPI error:', error);
+      toast({ 
+        title: "Erreur lors de la mise à jour du KPI", 
+        variant: "destructive" 
+      });
+    }
+  });
+};
+
+// Hook to get KPI values for a specific week
+export const useKPIValuesForWeek = (weekStartDate: string) => {
+  return useQuery({
+    queryKey: ['eos-kpi-values', weekStartDate],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('eos_kpi_values')
+        .select('id, kpi_id, value, week_start_date')
+        .eq('week_start_date', weekStartDate);
+      
+      if (error) throw error;
+      return data as EOSKPIValue[];
+    },
+    staleTime: 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// Hook to upsert KPI value (create or update)
+export const useUpsertKPIValue = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (kpiValue: Omit<EOSKPIValue, 'id' | 'created_at' | 'updated_at'>) => {
+      const { data, error } = await supabase
+        .from('eos_kpi_values')
+        .upsert(kpiValue, {
+          onConflict: 'kpi_id,week_start_date',
+          ignoreDuplicates: false
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ 
+        queryKey: ['eos-kpi-values', variables.week_start_date] 
+      });
+    },
+    onError: (error) => {
+      console.error('Upsert KPI value error:', error);
+      toast({ 
+        title: "Erreur lors de la sauvegarde", 
+        variant: "destructive" 
+      });
+    }
+  });
+};
+
+// Hook to get historical KPI values for trends (last 13 weeks)
+export const useKPITrends = (kpiId: string) => {
+  return useQuery({
+    queryKey: ['eos-kpi-trends', kpiId],
+    queryFn: async () => {
+      const thirteenWeeksAgo = new Date();
+      thirteenWeeksAgo.setDate(thirteenWeeksAgo.getDate() - (13 * 7));
+      
+      const { data, error } = await supabase
+        .from('eos_kpi_values')
+        .select('value, week_start_date')
+        .eq('kpi_id', kpiId)
+        .gte('week_start_date', thirteenWeeksAgo.toISOString().split('T')[0])
+        .order('week_start_date', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    enabled: !!kpiId,
+  });
+};
+
 // Todos hooks with realtime optimizations
 export const useEOSTodos = () => {
   const queryClient = useQueryClient();
