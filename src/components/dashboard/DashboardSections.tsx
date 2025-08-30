@@ -10,7 +10,7 @@ export function DashboardSections() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
+            <Users className="h-5 w-5 text-muted-foreground" />
             Gestion Clients
           </CardTitle>
         </CardHeader>
@@ -45,7 +45,7 @@ export function DashboardSections() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5 text-primary" />
+            <Video className="h-5 w-5 text-muted-foreground" />
             Production Vidéos
           </CardTitle>
         </CardHeader>
@@ -72,7 +72,7 @@ export function DashboardSections() {
               </div>
               <div>
                 <span className="text-muted-foreground">Publiées:</span>
-                <span className="ml-2 font-semibold text-success">87</span>
+                <span className="ml-2 font-semibold text-foreground">87</span>
               </div>
             </div>
           </div>
@@ -83,18 +83,18 @@ export function DashboardSections() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-primary" />
+            <Target className="h-5 w-5 text-muted-foreground" />
             Performance Ads
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-3 bg-success/10 rounded-lg">
-              <div className="text-xl font-bold text-success">$1.20</div>
+            <div className="text-center p-3 border border-success/20 rounded-lg">
+              <div className="text-xl font-bold text-foreground">$1.20</div>
               <div className="text-xs text-muted-foreground">CPC Moyen</div>
             </div>
-            <div className="text-center p-3 bg-warning/10 rounded-lg">
-              <div className="text-xl font-bold text-warning">$4.50</div>
+            <div className="text-center p-3 border border-warning/20 rounded-lg">
+              <div className="text-xl font-bold text-foreground">$4.50</div>
               <div className="text-xs text-muted-foreground">CPL Moyen</div>
             </div>
           </div>
@@ -102,12 +102,12 @@ export function DashboardSections() {
           <div className="border-t pt-4">
             <h5 className="font-semibold mb-2">Alertes Automatiques</h5>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertTriangle className="h-4 w-4 text-destructive" />
                 TechnoMax: CPC +35%
               </div>
-              <div className="flex items-center gap-2 text-warning">
-                <AlertTriangle className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertTriangle className="h-4 w-4 text-warning" />
                 Budget Resto Plus: 90% dépensé
               </div>
             </div>
@@ -119,7 +119,7 @@ export function DashboardSections() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
+            <Calendar className="h-5 w-5 text-muted-foreground" />
             EOS Model
           </CardTitle>
         </CardHeader>

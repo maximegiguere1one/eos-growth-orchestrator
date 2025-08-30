@@ -91,7 +91,7 @@ export function AppSidebar() {
 
   const getNavClass = (path: string) => {
     return isActive(path) 
-      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium border-l-2 border-sidebar-primary/20" 
       : "hover:bg-sidebar-accent/50 text-sidebar-foreground";
   };
 

@@ -28,7 +28,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <Badge variant="secondary" className="bg-muted text-muted-foreground">
                 Système Opérationnel
               </Badge>
-              <Button variant="default" className="hidden md:flex">
+              <Button variant="outline" className="hidden md:flex">
                 Rapport Hebdo
               </Button>
             </div>

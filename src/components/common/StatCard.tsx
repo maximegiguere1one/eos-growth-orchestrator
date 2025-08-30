@@ -15,11 +15,11 @@ interface StatCardProps {
 }
 
 const toneClasses = {
-  success: "border-l-2 border-l-success/20 text-success",
-  warning: "border-l-2 border-l-warning/20 text-warning", 
-  info: "border-l-2 border-l-info/20 text-info",
-  destructive: "border-l-2 border-l-destructive/20 text-destructive",
-  primary: "border-l-2 border-l-primary/20 text-primary"
+  success: "border-l-2 border-l-success/20",
+  warning: "border-l-2 border-l-warning/20", 
+  info: "border-l-2 border-l-info/20",
+  destructive: "border-l-2 border-l-destructive/20",
+  primary: "border-l-2 border-l-muted/20"
 };
 
 export function StatCard({ 
@@ -50,17 +50,17 @@ export function StatCard({
           <>
             <Progress value={progress} className="mb-2" />
             {alert && (
-              <div className={cn("text-sm", toneClasses[tone])}>{alert}</div>
+              <div className="text-sm text-muted-foreground">{alert}</div>
             )}
           </>
         )}
         {change && (
-          <div className={cn("text-sm", toneClasses[tone])}>
+          <div className="text-sm text-muted-foreground">
             {change}
           </div>
         )}
         {alert && progress === undefined && (
-          <div className={cn("text-sm", toneClasses[tone])}>
+          <div className="text-sm text-muted-foreground">
             {alert}
           </div>
         )}

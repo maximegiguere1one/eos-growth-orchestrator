@@ -2,9 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function Recommendations() {
   return (
-    <Card className="border-l-2 border-l-primary/20 motion-safe:animate-fade-in">
+    <Card className="border-l-2 border-l-muted/40 motion-safe:animate-fade-in">
       <CardHeader>
-        <CardTitle className="text-primary">👉 Recommandations Prioritaires</CardTitle>
+        <CardTitle className="text-foreground">👉 Recommandations Prioritaires</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2 text-sm" role="status" aria-live="polite">
