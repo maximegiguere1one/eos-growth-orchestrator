@@ -335,7 +335,14 @@ export const useEOSMeetings = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as EOSMeeting[];
+      return data.map(meeting => ({
+        ...meeting,
+        agenda: meeting.agenda as Array<{
+          key: string;
+          title: string;
+          minutes: number;
+        }>
+      })) as EOSMeeting[];
     }
   });
 };

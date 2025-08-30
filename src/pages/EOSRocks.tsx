@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -114,7 +113,7 @@ export default function EOSRocks() {
       <PageHeader 
         title="🎯 Rocks EOS"
         subtitle="Objectifs trimestriels - Les pierres angulaires de votre croissance"
-        action={
+        actions={
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -204,11 +203,11 @@ export default function EOSRocks() {
               <div className="text-sm text-muted-foreground">Rocks Actifs</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-success">{rocks.filter(r => r.status === 'completed').length}</div>
+              <div className="text-2xl font-bold text-green-600">{rocks.filter(r => r.status === 'completed').length}</div>
               <div className="text-sm text-muted-foreground">Complétés</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-warning">{rocks.filter(r => r.status === 'at_risk').length}</div>
+              <div className="text-2xl font-bold text-orange-600">{rocks.filter(r => r.status === 'at_risk').length}</div>
               <div className="text-sm text-muted-foreground">À Risque</div>
             </div>
             <div className="text-center p-4 border rounded-lg">
@@ -219,10 +218,10 @@ export default function EOSRocks() {
 
           {/* Quarter progress alert */}
           {isQuarterMidway() && calculateQuarterProgress() < 50 && rocks.length > 0 && (
-            <div className="mt-4 p-4 border border-warning bg-warning/5 rounded-lg">
+            <div className="mt-4 p-4 border border-orange-200 bg-orange-50 rounded-lg">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-warning" />
-                <span className="font-semibold text-warning">Alerte mi-trimestre</span>
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <span className="font-semibold text-orange-600">Alerte mi-trimestre</span>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 Vous êtes à mi-parcours du trimestre avec seulement {calculateQuarterProgress()}% de progression globale. 
@@ -260,7 +259,7 @@ export default function EOSRocks() {
                         <h3 className="text-lg font-semibold">{rock.title}</h3>
                         <Badge 
                           variant={getStatusColor(rock.status)}
-                          className={rock.status === 'completed' ? 'bg-success text-success-foreground' : ''}
+                          className={rock.status === 'completed' ? 'bg-green-500 text-white' : ''}
                         >
                           {getStatusLabel(rock.status)}
                         </Badge>
@@ -349,7 +348,7 @@ export default function EOSRocks() {
                   </div>
                   
                   {rock.completed_at && (
-                    <div className="mt-3 text-sm text-success">
+                    <div className="mt-3 text-sm text-green-600">
                       ✅ Complété le {new Date(rock.completed_at).toLocaleDateString()}
                     </div>
                   )}

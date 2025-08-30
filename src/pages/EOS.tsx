@@ -164,12 +164,10 @@ const EOS = () => {
               icon={Target}
               title="Aucun Rock défini"
               description="Créez vos premiers objectifs trimestriels pour commencer à utiliser le système EOS."
-              action={
-                <Button onClick={() => navigate('/eos/rocks')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Créer un Rock
-                </Button>
-              }
+              action={{
+                label: "Créer un Rock",
+                onClick: () => navigate('/eos/rocks')
+              }}
             />
           ) : (
             <div className="space-y-4">
@@ -275,11 +273,10 @@ const EOS = () => {
                 icon={CheckSquare}
                 title="Aucune issue active"
                 description="Aucun problème en cours. Parfait !"
-                action={
-                  <Button onClick={() => navigate('/eos/issues')} variant="outline">
-                    Voir toutes les issues
-                  </Button>
-                }
+                action={{
+                  label: "Voir toutes les issues",
+                  onClick: () => navigate('/eos/issues')
+                }}
               />
             ) : (
               <div className="space-y-3">
@@ -335,12 +332,10 @@ const EOS = () => {
               icon={BarChart3}
               title="Scorecard non configuré"
               description="Configurez vos KPIs pour suivre les métriques hebdomadaires de votre entreprise."
-              action={
-                <Button onClick={() => navigate('/eos/scorecard')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Configurer le Scorecard
-                </Button>
-              }
+              action={{
+                label: "Configurer le Scorecard",
+                onClick: () => navigate('/eos/scorecard')
+              }}
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

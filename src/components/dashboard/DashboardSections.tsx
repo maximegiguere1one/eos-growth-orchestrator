@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Users, Video, Target, Calendar, Plus } from "lucide-react";
+import { AlertTriangle, Users, Video, Target, Calendar, Plus, Building2 } from "lucide-react";
 import { useEOSIssues, useEOSRocks, useEOSKPIs } from "@/hooks/useEOS";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useNavigate } from "react-router-dom";
@@ -32,11 +32,10 @@ export function DashboardSections() {
             icon={Users}
             title="Aucun client configuré"
             description="Connectez vos données clients pour voir les statistiques en temps réel."
-            action={
-              <Button onClick={() => navigate('/clients')} variant="outline">
-                Configurer les clients
-              </Button>
-            }
+            action={{
+              label: "Configurer les clients",
+              onClick: () => navigate('/clients')
+            }}
           />
         </CardContent>
       </Card>
@@ -54,11 +53,10 @@ export function DashboardSections() {
             icon={Video}
             title="Production non configurée"
             description="Configurez vos workflows de production vidéo."
-            action={
-              <Button onClick={() => navigate('/videos')} variant="outline">
-                Configurer la production
-              </Button>
-            }
+            action={{
+              label: "Configurer la production",
+              onClick: () => navigate('/videos')
+            }}
           />
         </CardContent>
       </Card>
@@ -76,11 +74,10 @@ export function DashboardSections() {
             icon={Target}
             title="Publicités non configurées"
             description="Connectez vos comptes publicitaires pour suivre les performances."
-            action={
-              <Button onClick={() => navigate('/ads')} variant="outline">
-                Configurer les ads
-              </Button>
-            }
+            action={{
+              label: "Configurer les ads",
+              onClick: () => navigate('/ads')
+            }}
           />
         </CardContent>
       </Card>

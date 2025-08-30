@@ -54,8 +54,8 @@ export default function EOSIssues() {
 
   const getPriorityColor = (priority: number) => {
     if (priority >= 8) return 'destructive';
-    if (priority >= 5) return 'warning';
-    return 'secondary';
+    if (priority >= 5) return 'secondary';
+    return 'outline';
   };
 
   const getPriorityLabel = (priority: number) => {
@@ -77,7 +77,7 @@ export default function EOSIssues() {
       <PageHeader 
         title="🔥 Issues EOS"
         subtitle="Identifiez, discutez et résolvez les problèmes de votre entreprise"
-        action={
+        actions={
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -168,7 +168,7 @@ export default function EOSIssues() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-warning" />
+                <AlertTriangle className="h-5 w-5 text-orange-500" />
                 Issues Actives ({issues.filter(i => i.status === 'open').length})
               </CardTitle>
             </CardHeader>
@@ -240,7 +240,7 @@ export default function EOSIssues() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Check className="h-5 w-5 text-success" />
+                  <Check className="h-5 w-5 text-green-500" />
                   Issues Résolues Récemment
                 </CardTitle>
               </CardHeader>
@@ -250,14 +250,14 @@ export default function EOSIssues() {
                     .filter(issue => issue.status === 'resolved')
                     .slice(0, 5)
                     .map((issue) => (
-                      <div key={issue.id} className="flex items-center justify-between p-3 border rounded-lg bg-success/5">
+                      <div key={issue.id} className="flex items-center justify-between p-3 border rounded-lg bg-green-50">
                         <div>
                           <h5 className="font-medium">{issue.title}</h5>
                           <p className="text-sm text-muted-foreground">
                             Résolu le {new Date(issue.resolved_at!).toLocaleDateString()}
                           </p>
                         </div>
-                        <Badge className="bg-success text-success-foreground">
+                        <Badge className="bg-green-500 text-white">
                           Résolu
                         </Badge>
                       </div>
