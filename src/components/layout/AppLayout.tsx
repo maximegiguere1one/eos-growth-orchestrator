@@ -15,7 +15,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         
         <div className="flex-1 flex flex-col">
           {/* Global Header */}
-          <header className="h-16 border-b bg-card flex items-center justify-between px-6">
+          <header className="sticky top-0 z-40 h-16 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 flex items-center justify-between px-6">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div>
@@ -28,11 +28,19 @@ export function AppLayout({ children }: AppLayoutProps) {
               <Badge variant="secondary" className="bg-success text-success-foreground">
                 Système Opérationnel
               </Badge>
-              <Button className="bg-gradient-primary text-primary-foreground">
+              <Button className="bg-gradient-primary text-primary-foreground hidden md:flex">
                 Rapport Hebdo
               </Button>
             </div>
           </header>
+
+          {/* Mobile FAB */}
+          <Button 
+            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg bg-gradient-primary text-primary-foreground md:hidden"
+            aria-label="Actions rapides"
+          >
+            📊
+          </Button>
 
           {/* Main Content */}
           <main className="flex-1 p-6">
