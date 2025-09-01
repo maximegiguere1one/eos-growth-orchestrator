@@ -14,6 +14,7 @@ interface EnvironmentConfig {
   POSTHOG_KEY?: string;
   POSTHOG_HOST?: string;
   SENTRY_DSN?: string;
+  HONEYCOMB_API_KEY?: string;
   
   // Feature flags
   ENABLE_ANALYTICS: boolean;
@@ -40,6 +41,7 @@ function validateEnvironment(): EnvironmentConfig {
     POSTHOG_KEY: import.meta.env.VITE_POSTHOG_KEY,
     POSTHOG_HOST: import.meta.env.VITE_POSTHOG_HOST || 'https://app.posthog.com',
     SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
+    HONEYCOMB_API_KEY: import.meta.env.VITE_HONEYCOMB_API_KEY,
     
     // Feature flags
     ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',

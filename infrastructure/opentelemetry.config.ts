@@ -1,24 +1,25 @@
 
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION, SEMRESATTRS_DEPLOYMENT_ENVIRONMENT } from '@opentelemetry/semantic-conventions';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-otlp-http';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
+import { env } from '@/config/environment';
 
-const isProduction = import.meta.env.VITE_APP_ENV === 'production';
-const serviceName = import.meta.env.VITE_APP_NAME || 'eos-management';
-const serviceVersion = import.meta.env.VITE_APP_VERSION || '1.0.0';
+const isProduction = env.APP_ENV === 'production';
+const serviceName = env.APP_NAME || 'eos-management';
+const serviceVersion = env.APP_VERSION || '1.0.0';
 
 // Only initialize in production or when explicitly enabled
-if (isProduction || import.meta.env.VITE_ENABLE_TRACING === 'true') {
+if (isProduction || env.ENABLE_TRACING) {
   const provider = new WebTracerProvider({
     resource: new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-      [SemanticResourceAttributes.SERVICE_VERSION]: serviceVersion,
-      [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: import.meta.env.VITE_APP_ENV,
+      [SEMRESATTRS_SERVICE_NAME]: serviceName,
+      [SEMRESATTRS_SERVICE_VERSION]: serviceVersion,
+      [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: env.APP_ENV,
     }),
   });
 
@@ -26,7 +27,7 @@ if (isProduction || import.meta.env.VITE_ENABLE_TRACING === 'true') {
   const exporter = new OTLPTraceExporter({
     url: 'https://api.honeycomb.io/v1/traces', // Example endpoint
     headers: {
-      'x-honeycomb-team': import.meta.env.VITE_HONEYCOMB_API_KEY || '',
+      'x-honeycomb-team': env.HONEYCOMB_API_KEY || '',
     },
   });
 
@@ -41,9 +42,10 @@ if (isProduction || import.meta.env.VITE_ENABLE_TRACING === 'true') {
           /^https:\/\/app\.posthog\.com\/.*/,
         ],
         clearTimingResources: true,
-        applyCustomAttributesOnSpan: (span, request) => {
+        applyCustomAttributesOnSpan: (span, request, response) => {
           // Add custom attributes for API calls
-          if (request.url.includes('supabase.co')) {
+          const url = typeof request === 'string' ? request : request.url;
+          if (url && url.includes('supabase.co')) {
             span.setAttributes({
               'http.client.name': 'supabase',
               'service.name': 'supabase-api',
