@@ -6,7 +6,7 @@ import { AuthProvider } from '@/contexts/AuthProvider';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
+
 import { analytics } from '@/analytics/posthog';
 import { logger } from '@/lib/observability';
 import { isDevelopment } from '@/config/environment';
@@ -32,7 +32,7 @@ function App() {
       <AuthProvider>
         <Router>
           <div className="min-h-screen bg-background">
-            <Suspense fallback={<LoadingSkeleton />}>
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>}>
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
                 <Route
