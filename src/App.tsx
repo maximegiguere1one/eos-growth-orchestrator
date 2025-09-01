@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -27,85 +26,84 @@ const EOSMeetings = lazy(() => import('@/pages/EOSMeetings'));
 const Scorecard = lazy(() => import('@/pages/Scorecard'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
-
 function App() {
   return (
     <ErrorBoundary>
-        <AuthProvider>
-          <Router>
-            <div className="min-h-screen bg-background">
-              <Suspense fallback={<LoadingSkeleton />}>
-                <Routes>
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <AppLayout>
-                          <Dashboard />
-                        </AppLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/eos"
-                    element={
-                      <ProtectedRoute>
-                        <AppLayout>
-                          <EOS />
-                        </AppLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/eos/issues"
-                    element={
-                      <ProtectedRoute>
-                        <AppLayout>
-                          <EOSIssues />
-                        </AppLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/eos/rocks"
-                    element={
-                      <ProtectedRoute>
-                        <AppLayout>
-                          <EOSRocks />
-                        </AppLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/eos/meetings"
-                    element={
-                      <ProtectedRoute>
-                        <AppLayout>
-                          <EOSMeetings />
-                        </AppLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/scorecard"
-                    element={
-                      <ProtectedRoute>
-                        <AppLayout>
-                          <Scorecard />
-                        </AppLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/404" element={<NotFound />} />
-                  <Route path="*" element={<Navigate to="/404" replace />} />
-                </Routes>
-              </Suspense>
-            </div>
-          </Router>
-        </AuthProvider>
-        <Toaster />
-        {isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-background">
+            <Suspense fallback={<LoadingSkeleton />}>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Dashboard />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/eos"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <EOS />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/eos/issues"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <EOSIssues />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/eos/rocks"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <EOSRocks />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/eos/meetings"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <EOSMeetings />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/scorecard"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Scorecard />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/404" element={<NotFound />} />
+                <Route path="*" element={<Navigate to="/404" replace />} />
+              </Routes>
+            </Suspense>
+          </div>
+        </Router>
+      </AuthProvider>
+      <Toaster />
+      {isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
     </ErrorBoundary>
   );
 }
