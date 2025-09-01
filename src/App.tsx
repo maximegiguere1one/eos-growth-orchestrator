@@ -46,10 +46,13 @@ const queryClient = new QueryClient({
   },
 });
 
-// Global error handler for React Query
+// Global error handler for React Query - correct event handling
 queryClient.getQueryCache().subscribe((event) => {
-  if (event.type === 'error') {
-    logger.error('React Query error', { error: event.error, query: event.query });
+  if (event.type === 'updated' && event.query.state.status === 'error') {
+    logger.error('React Query error', { 
+      error: event.query.state.error, 
+      queryKey: event.query.queryKey 
+    });
   }
 });
 
