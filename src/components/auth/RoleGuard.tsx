@@ -1,5 +1,6 @@
+
 import { ReactNode } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthProvider';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
@@ -13,7 +14,7 @@ interface RoleGuardProps {
 }
 
 export function RoleGuard({ children, requiredRole, fallback }: RoleGuardProps) {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
   const { data: userRoles, isLoading: rolesLoading, error } = useQuery({
     queryKey: ['user-roles', user?.id],
