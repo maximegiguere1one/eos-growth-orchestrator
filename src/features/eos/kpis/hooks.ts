@@ -10,14 +10,14 @@ export function useEOSKPIs() {
     queryFn: async (): Promise<EOSKPI[]> => {
       const { data, error } = await supabase
         .from('eos_kpis')
-        .select('*')
+        .select('id, name, unit, direction, target, position, is_active, archived_at, created_by, created_at, updated_at')
         .eq('is_active', true)
         .order('position', { ascending: true });
 
       if (error) throw error;
       return data || [];
     },
-    staleTime: 30 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
@@ -91,13 +91,13 @@ export function useKPIValuesForWeek(weekStartDate: string) {
     queryFn: async (): Promise<EOSKPIValue[]> => {
       const { data, error } = await supabase
         .from('eos_kpi_values')
-        .select('*')
+        .select('id, kpi_id, week_start_date, value, created_by, created_at, updated_at')
         .eq('week_start_date', weekStartDate);
 
       if (error) throw error;
       return data || [];
     },
-    staleTime: 10 * 1000,
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
@@ -147,7 +147,7 @@ export function useKPITrends(kpiId: string) {
       if (error) throw error;
       return data || [];
     },
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!kpiId,
   });
 }

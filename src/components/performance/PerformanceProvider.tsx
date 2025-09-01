@@ -2,7 +2,7 @@ import { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useEOSIssues } from '@/features/eos/issues/hooks';
 import { useEOSRocks } from '@/features/eos/rocks/hooks';
 import { useEOSKPIs } from '@/features/eos/kpis/hooks';
-import { useEOSTodos } from '@/hooks/useEOS';
+import { useEOSTodos } from '@/features/eos/todos/hooks';
 
 interface PerformanceContextType {
   issuesCount: number;
@@ -20,13 +20,21 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
   const { data: todos = [], isLoading: todosLoading } = useEOSTodos();
   const { data: kpis = [], isLoading: kpisLoading } = useEOSKPIs();
 
-  const contextValue = useMemo(() => ({
-    issuesCount: issues.filter(i => i.status === 'open').length,
-    rocksProgress: rocks.length === 0 ? 0 : Math.round(rocks.reduce((sum, rock) => sum + rock.progress, 0) / rocks.length),
-    activeTodosCount: todos.length,
-    kpisCount: kpis.length,
-    isLoading: issuesLoading || rocksLoading || todosLoading || kpisLoading,
-  }), [issues, rocks, todos, kpis, issuesLoading, rocksLoading, todosLoading, kpisLoading]);
+  const contextValue = useMemo(() => {
+    const openIssuesCount = issues.filter(i => i.status === 'open').length;
+    const averageRocksProgress = rocks.length === 0 ? 0 : Math.round(rocks.reduce((sum, rock) => sum + rock.progress, 0) / rocks.length);
+    const todosCount = todos.length;
+    const activeKpisCount = kpis.length;
+    const loading = issuesLoading || rocksLoading || todosLoading || kpisLoading;
+
+    return {
+      issuesCount: openIssuesCount,
+      rocksProgress: averageRocksProgress,
+      activeTodosCount: todosCount,
+      kpisCount: activeKpisCount,
+      isLoading: loading,
+    };
+  }, [issues, rocks, todos, kpis, issuesLoading, rocksLoading, todosLoading, kpisLoading]);
 
   return (
     <PerformanceContext.Provider value={contextValue}>

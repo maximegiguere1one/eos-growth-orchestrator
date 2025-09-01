@@ -12,8 +12,10 @@ import { analytics } from '@/analytics/posthog';
 import { logger } from '@/lib/observability';
 import { isDevelopment } from '@/config/environment';
 
-// Initialize analytics
-analytics.init();
+// Defer analytics initialization to not block startup
+setTimeout(() => {
+  analytics.init();
+}, 100);
 
 // Lazy load pages for better performance
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
@@ -29,16 +31,16 @@ const NotFound = lazy(() => import('@/pages/NotFound'));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000, // 5 minutes - standardized across app
       gcTime: 10 * 60 * 1000, // 10 minutes
       retry: (failureCount, error: any) => {
-        // Don't retry on 4xx errors
-        if (error?.status >= 400 && error?.status < 500) {
+        // Don't retry on 4xx errors except 429 (rate limit)
+        if (error?.status >= 400 && error?.status < 500 && error?.status !== 429) {
           return false;
         }
         return failureCount < 3;
       },
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false, // Reduce unnecessary network calls
     },
     mutations: {
       retry: 1,

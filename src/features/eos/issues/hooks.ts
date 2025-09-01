@@ -13,7 +13,7 @@ export function useEOSIssues() {
     queryFn: async (): Promise<EOSIssue[]> => {
       const { data, error } = await supabase
         .from('eos_issues')
-        .select('*')
+        .select('id, title, description, priority, status, created_by, assigned_to, resolved_at, archived_at, created_at, updated_at')
         .is('archived_at', null)
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false });
@@ -21,7 +21,7 @@ export function useEOSIssues() {
       if (error) throw error;
       return data || [];
     },
-    staleTime: 30 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Real-time subscription
