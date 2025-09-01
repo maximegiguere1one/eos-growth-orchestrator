@@ -4,7 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Building2, Target, Users, BarChart3, CheckSquare, Calendar, Plus, AlertTriangle } from "lucide-react";
-import { useEOSIssues, useEOSRocks, useEOSKPIs } from "@/hooks/useEOS";
+import { useEOSKPIs } from "@/hooks/useEOS";
+import { useEOSSummary } from "@/hooks/useEOSSummary";
+import { useEOSIssuesPaginated, useEOSRocksPaginated } from "@/hooks/useEOSPaginated";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useNavigate } from "react-router-dom";
 import { useMemo, memo, useCallback } from "react";
@@ -14,8 +16,10 @@ import { OptimizedIssueCard } from "@/components/eos/OptimizedIssueCard";
 
 const EOS = memo(function EOS() {
   const navigate = useNavigate();
-  const { data: issues = [], isLoading: issuesLoading } = useEOSIssues();
-  const { data: rocks = [], isLoading: rocksLoading } = useEOSRocks();
+  // Use optimized hooks for better performance
+  const { data: summary, isLoading: summaryLoading } = useEOSSummary();
+  const { data: issuesPage = { data: [], totalCount: 0 }, isLoading: issuesLoading } = useEOSIssuesPaginated(0, 3);
+  const { data: rocksPage = { data: [], totalCount: 0 }, isLoading: rocksLoading } = useEOSRocksPaginated(0, 5);
   const { data: kpis = [], isLoading: kpisLoading } = useEOSKPIs();
 
   // Memoized navigation callbacks to prevent unnecessary re-renders
@@ -25,11 +29,11 @@ const EOS = memo(function EOS() {
   const navigateToRocks = useCallback(() => navigate('/eos/rocks'), [navigate]);
   const navigateToMeetings = useCallback(() => navigate('/eos/meetings'), [navigate]);
 
-  // Calculate EOS component status based on real data
+  // Calculate EOS component status based on optimized summary data
   const eosOverview = useMemo(() => {
-    const activeIssues = issues.filter(issue => issue.status === 'open');
-    const completedRocks = rocks.filter(rock => rock.status === 'completed');
-    const activeKPIs = kpis.length;
+    if (!summary) return [];
+
+    const { activeIssuesCount, rocksCount, completedRocksCount, kpisCount, averageRocksProgress } = summary;
 
     return [
       {
@@ -48,16 +52,16 @@ const EOS = memo(function EOS() {
       },
       {
         title: "Data (Scorecard)",
-        status: activeKPIs > 0 ? "Jour" : "À configurer",
-        progress: activeKPIs > 0 ? 95 : 0,
-        description: `${activeKPIs} KPI${activeKPIs > 1 ? 's' : ''} configuré${activeKPIs > 1 ? 's' : ''}`,
+        status: kpisCount > 0 ? "Jour" : "À configurer",
+        progress: kpisCount > 0 ? 95 : 0,
+        description: `${kpisCount} KPI${kpisCount > 1 ? 's' : ''} configuré${kpisCount > 1 ? 's' : ''}`,
         action: navigateToScorecard
       },
       {
         title: "Issues (Problèmes)",
-        status: activeIssues.length > 7 ? "Attention" : activeIssues.length > 0 ? "En cours" : "Jour",
-        progress: activeIssues.length === 0 ? 100 : Math.max(0, 100 - (activeIssues.length * 10)),
-        description: `${activeIssues.length} issue${activeIssues.length > 1 ? 's' : ''} active${activeIssues.length > 1 ? 's' : ''}`,
+        status: activeIssuesCount > 7 ? "Attention" : activeIssuesCount > 0 ? "En cours" : "Jour",
+        progress: activeIssuesCount === 0 ? 100 : Math.max(0, 100 - (activeIssuesCount * 10)),
+        description: `${activeIssuesCount} issue${activeIssuesCount > 1 ? 's' : ''} active${activeIssuesCount > 1 ? 's' : ''}`,
         action: navigateToIssues
       },
       {
@@ -69,15 +73,15 @@ const EOS = memo(function EOS() {
       },
       {
         title: "Traction (Rocks)",
-        status: rocks.length > 0 ? "En cours" : "À configurer",
-        progress: rocks.length > 0 ? Math.round((completedRocks.length / rocks.length) * 100) : 0,
-        description: `${completedRocks.length}/${rocks.length} rocks complétés`,
+        status: rocksCount > 0 ? "En cours" : "À configurer",
+        progress: rocksCount > 0 ? averageRocksProgress : 0,
+        description: `${completedRocksCount}/${rocksCount} rocks complétés`,
         action: navigateToRocks
       }
     ];
-  }, [issues, rocks, kpis, navigateToEOS, navigateToScorecard, navigateToIssues, navigateToRocks]);
+  }, [summary, navigateToEOS, navigateToScorecard, navigateToIssues, navigateToRocks]);
 
-  if (issuesLoading || rocksLoading || kpisLoading) {
+  if (summaryLoading || issuesLoading || rocksLoading || kpisLoading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -151,7 +155,7 @@ const EOS = memo(function EOS() {
           </div>
         </CardHeader>
         <CardContent>
-          {rocks.length === 0 ? (
+          {rocksPage.data.length === 0 ? (
             <EmptyState
               icon={Target}
               title="Aucun Rock défini"
@@ -163,14 +167,14 @@ const EOS = memo(function EOS() {
             />
           ) : (
             <div className="space-y-4">
-              {rocks.slice(0, 5).map((rock) => (
+              {rocksPage.data.map((rock) => (
                 <OptimizedRockCard key={rock.id} rock={rock} />
               ))}
               
-              {rocks.length > 5 && (
+              {rocksPage.totalCount > 5 && (
                 <div className="text-center pt-4">
                   <Button variant="outline" onClick={navigateToRocks}>
-                    Voir tous les rocks ({rocks.length})
+                    Voir tous les rocks ({rocksPage.totalCount})
                   </Button>
                 </div>
               )}
@@ -228,7 +232,7 @@ const EOS = memo(function EOS() {
             </div>
           </CardHeader>
           <CardContent>
-            {issues.length === 0 ? (
+            {issuesPage.data.length === 0 ? (
               <EmptyState
                 icon={CheckSquare}
                 title="Aucune issue active"
@@ -240,14 +244,14 @@ const EOS = memo(function EOS() {
               />
             ) : (
               <div className="space-y-3">
-                {issues.slice(0, 3).map((issue) => (
+                {issuesPage.data.map((issue) => (
                   <OptimizedIssueCard key={issue.id} issue={issue} />
                 ))}
                 
-                {issues.length > 3 && (
+                {issuesPage.totalCount > 3 && (
                   <div className="text-center pt-2">
                     <Button variant="outline" size="sm" onClick={navigateToIssues}>
-                      Voir toutes les issues ({issues.length})
+                      Voir toutes les issues ({issuesPage.totalCount})
                     </Button>
                   </div>
                 )}

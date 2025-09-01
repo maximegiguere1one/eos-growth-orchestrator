@@ -1,8 +1,5 @@
 import { createContext, useContext, ReactNode, useMemo } from 'react';
-import { useEOSIssues } from '@/features/eos/issues/hooks';
-import { useEOSRocks } from '@/features/eos/rocks/hooks';
-import { useEOSKPIs } from '@/features/eos/kpis/hooks';
-import { useEOSTodos } from '@/features/eos/todos/hooks';
+import { useEOSSummary } from '@/hooks/useEOSSummary';
 
 interface PerformanceContextType {
   issuesCount: number;
@@ -15,26 +12,27 @@ interface PerformanceContextType {
 const PerformanceContext = createContext<PerformanceContextType | undefined>(undefined);
 
 export function PerformanceProvider({ children }: { children: ReactNode }) {
-  const { data: issues = [], isLoading: issuesLoading } = useEOSIssues();
-  const { data: rocks = [], isLoading: rocksLoading } = useEOSRocks();
-  const { data: todos = [], isLoading: todosLoading } = useEOSTodos();
-  const { data: kpis = [], isLoading: kpisLoading } = useEOSKPIs();
+  const { data: summary, isLoading } = useEOSSummary();
 
   const contextValue = useMemo(() => {
-    const openIssuesCount = issues.filter(i => i.status === 'open').length;
-    const averageRocksProgress = rocks.length === 0 ? 0 : Math.round(rocks.reduce((sum, rock) => sum + rock.progress, 0) / rocks.length);
-    const todosCount = todos.length;
-    const activeKpisCount = kpis.length;
-    const loading = issuesLoading || rocksLoading || todosLoading || kpisLoading;
+    if (!summary) {
+      return {
+        issuesCount: 0,
+        rocksProgress: 0,
+        activeTodosCount: 0,
+        kpisCount: 0,
+        isLoading: true,
+      };
+    }
 
     return {
-      issuesCount: openIssuesCount,
-      rocksProgress: averageRocksProgress,
-      activeTodosCount: todosCount,
-      kpisCount: activeKpisCount,
-      isLoading: loading,
+      issuesCount: summary.activeIssuesCount,
+      rocksProgress: summary.averageRocksProgress,
+      activeTodosCount: summary.todosCount,
+      kpisCount: summary.kpisCount,
+      isLoading,
     };
-  }, [issues, rocks, todos, kpis, issuesLoading, rocksLoading, todosLoading, kpisLoading]);
+  }, [summary, isLoading]);
 
   return (
     <PerformanceContext.Provider value={contextValue}>
