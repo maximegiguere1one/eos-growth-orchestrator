@@ -92,11 +92,17 @@ function DevtoolsLoader() {
 
   React.useEffect(() => {
     if (isDevelopment) {
-      import('@tanstack/react-query-devtools').then(({ ReactQueryDevtools }) => {
-        setDevtools(() => ReactQueryDevtools);
-      });
+      import('@tanstack/react-query-devtools')
+        .then(({ ReactQueryDevtools }) => {
+          setDevtools(() => ReactQueryDevtools);
+        })
+        .catch((error) => {
+          console.warn('Failed to load React Query Devtools:', error);
+        });
     }
   }, []);
 
-  return Devtools ? <Devtools initialIsOpen={false} /> : null;
+  if (!Devtools) return null;
+  
+  return <Devtools initialIsOpen={false} />;
 }

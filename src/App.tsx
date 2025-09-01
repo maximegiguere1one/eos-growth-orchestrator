@@ -10,7 +10,7 @@ import { PageLoader } from '@/components/common/PageLoader';
 
 import { analytics } from '@/analytics/posthog';
 import { logger } from '@/lib/observability';
-import { isDevelopment } from '@/config/environment';
+
 
 // Defer analytics initialization to not block startup
 setTimeout(() => {
