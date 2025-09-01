@@ -19,4 +19,15 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    exclude: [
+      '@opentelemetry/resources',
+      '@opentelemetry/sdk-trace-web',
+      '@opentelemetry/sdk-trace-base',
+      '@opentelemetry/exporter-trace-otlp-http',
+      '@opentelemetry/instrumentation',
+      '@opentelemetry/instrumentation-fetch',
+      '@opentelemetry/semantic-conventions'
+    ],
+  },
 }));
