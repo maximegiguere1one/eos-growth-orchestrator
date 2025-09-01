@@ -4,18 +4,36 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Users, Video, Target, Calendar, Plus, Building2 } from "lucide-react";
-import { useEOSIssues, useEOSRocks, useEOSKPIs } from "@/hooks/useEOS";
+import { useEOSSummary } from "@/hooks/useEOSSummary";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect } from "react";
 
 export function DashboardSections() {
   const navigate = useNavigate();
-  const { data: issues = [] } = useEOSIssues();
-  const { data: rocks = [] } = useEOSRocks();
-  const { data: kpis = [] } = useEOSKPIs();
+  const { data: summary, isLoading } = useEOSSummary();
 
-  const activeIssues = issues.filter(issue => issue.status === 'open');
-  const completedRocks = rocks.filter(rock => rock.status === 'completed');
+  // Prefetch EOS page on idle for better navigation performance
+  useEffect(() => {
+    const prefetchEOS = () => {
+      import('@/pages/EOS').catch(() => {
+        // Silently fail prefetch
+      });
+    };
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(prefetchEOS);
+    } else {
+      setTimeout(prefetchEOS, 100);
+    }
+  }, []);
+
+  // Prefetch on hover for EOS button
+  const handleEOSHover = useCallback(() => {
+    import('@/pages/EOS').catch(() => {
+      // Silently fail prefetch
+    });
+  }, []);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -94,25 +112,32 @@ export function DashboardSections() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm">Issues Actives</span>
-              <Badge variant={activeIssues.length > 0 ? "destructive" : "default"}>
-                {activeIssues.length}
+              <Badge variant={(summary?.activeIssuesCount || 0) > 0 ? "destructive" : "default"}>
+                {isLoading ? "..." : (summary?.activeIssuesCount || 0)}
               </Badge>
             </div>
             
             <div className="flex items-center justify-between">
               <span className="text-sm">Rocks Complétés</span>
               <span className="text-sm font-semibold">
-                {completedRocks.length}/{rocks.length}
+                {isLoading ? "..." : `${summary?.completedRocksCount || 0}/${summary?.rocksCount || 0}`}
               </span>
             </div>
             
             <div className="flex items-center justify-between">
               <span className="text-sm">KPIs Configurés</span>
-              <span className="text-sm font-semibold">{kpis.length}</span>
+              <span className="text-sm font-semibold">
+                {isLoading ? "..." : (summary?.kpisCount || 0)}
+              </span>
             </div>
             
             <div className="border-t pt-3 space-y-2">
-              <Button onClick={() => navigate('/eos')} className="w-full" size="sm">
+              <Button 
+                onClick={() => navigate('/eos')} 
+                onMouseEnter={handleEOSHover}
+                className="w-full" 
+                size="sm"
+              >
                 <Building2 className="h-4 w-4 mr-2" />
                 Voir le Dashboard EOS
               </Button>

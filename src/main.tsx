@@ -4,7 +4,6 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 // Import production configurations
 import { env, checkConfiguration } from '@/config/environment'
@@ -73,11 +72,31 @@ const queryClient = new QueryClient({
   // },
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Conditionally load React Query Devtools only in development
+const isDevelopment = import.meta.env.DEV;
+
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+
+root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
-      <ReactQueryDevtools initialIsOpen={false} />
+      {isDevelopment && <DevtoolsLoader />}
     </QueryClientProvider>
   </React.StrictMode>,
-)
+);
+
+// Lazy load devtools component only in development
+function DevtoolsLoader() {
+  const [Devtools, setDevtools] = React.useState<React.ComponentType<any> | null>(null);
+
+  React.useEffect(() => {
+    if (isDevelopment) {
+      import('@tanstack/react-query-devtools').then(({ ReactQueryDevtools }) => {
+        setDevtools(() => ReactQueryDevtools);
+      });
+    }
+  }, []);
+
+  return Devtools ? <Devtools initialIsOpen={false} /> : null;
+}

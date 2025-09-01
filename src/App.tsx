@@ -1,6 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthProvider';
 import { ProtectedLayout } from '@/components/layout/ProtectedLayout';
@@ -57,7 +57,6 @@ function App() {
         </Router>
       </AuthProvider>
       <Toaster />
-      {isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
     </ErrorBoundary>
   );
 }

@@ -19,55 +19,62 @@ export const useEOSSummary = () => {
   const query = useQuery({
     queryKey: ['eos-summary'],
     queryFn: async (): Promise<EOSSummary> => {
-      // Execute all count queries in parallel for better performance
-      const [issuesResult, rocksResult, todosResult, kpisResult] = await Promise.all([
-        // Issues count query - only count, not full data
+      // Execute optimized count and aggregate queries in parallel
+      const [issuesCountResult, activeIssuesResult, rocksAggResult, todosCountResult, kpisCountResult] = await Promise.all([
+        // Total issues count - head request only
         supabase
           .from('eos_issues')
-          .select('id, status', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .is('archived_at', null),
         
-        // Rocks count and progress aggregation
+        // Active issues count - head request only
+        supabase
+          .from('eos_issues')
+          .select('*', { count: 'exact', head: true })
+          .is('archived_at', null)
+          .eq('status', 'open'),
+        
+        // Rocks aggregations - use minimal data for calculations
         supabase
           .from('eos_rocks')
-          .select('id, status, progress', { count: 'exact' })
+          .select('status, progress', { count: 'exact' })
           .is('archived_at', null),
         
-        // Active todos count
+        // Active todos count - head request only
         supabase
           .from('eos_todos')
-          .select('id', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .is('archived_at', null)
           .is('completed_at', null),
         
-        // Active KPIs count
+        // Active KPIs count - head request only
         supabase
           .from('eos_kpis')
-          .select('id', { count: 'exact' })
+          .select('*', { count: 'exact', head: true })
           .is('archived_at', null)
           .eq('is_active', true)
       ]);
 
-      if (issuesResult.error) throw issuesResult.error;
-      if (rocksResult.error) throw rocksResult.error;
-      if (todosResult.error) throw todosResult.error;
-      if (kpisResult.error) throw kpisResult.error;
+      if (issuesCountResult.error) throw issuesCountResult.error;
+      if (activeIssuesResult.error) throw activeIssuesResult.error;
+      if (rocksAggResult.error) throw rocksAggResult.error;
+      if (todosCountResult.error) throw todosCountResult.error;
+      if (kpisCountResult.error) throw kpisCountResult.error;
 
-      // Calculate aggregations from minimal data
-      const activeIssuesCount = issuesResult.data?.filter(i => i.status === 'open').length || 0;
-      const completedRocksCount = rocksResult.data?.filter(r => r.status === 'completed').length || 0;
-      const averageRocksProgress = rocksResult.data?.length 
-        ? Math.round(rocksResult.data.reduce((sum, rock) => sum + rock.progress, 0) / rocksResult.data.length)
+      // Calculate aggregations from minimal rocks data
+      const completedRocksCount = rocksAggResult.data?.filter(r => r.status === 'completed').length || 0;
+      const averageRocksProgress = rocksAggResult.data?.length 
+        ? Math.round(rocksAggResult.data.reduce((sum, rock) => sum + rock.progress, 0) / rocksAggResult.data.length)
         : 0;
 
       return {
-        issuesCount: issuesResult.count || 0,
-        activeIssuesCount,
-        rocksCount: rocksResult.count || 0,
+        issuesCount: issuesCountResult.count || 0,
+        activeIssuesCount: activeIssuesResult.count || 0,
+        rocksCount: rocksAggResult.count || 0,
         completedRocksCount,
         averageRocksProgress,
-        todosCount: todosResult.count || 0,
-        kpisCount: kpisResult.count || 0,
+        todosCount: todosCountResult.count || 0,
+        kpisCount: kpisCountResult.count || 0,
       };
     },
     staleTime: 2 * 60 * 1000, // 2 minutes - summary data can be slightly stale
