@@ -1,7 +1,6 @@
 
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthProvider';
@@ -27,41 +26,10 @@ const EOSMeetings = lazy(() => import('@/pages/EOSMeetings'));
 const Scorecard = lazy(() => import('@/pages/Scorecard'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
-// Create React Query client with production-ready config
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes - standardized across app
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: (failureCount, error: any) => {
-        // Don't retry on 4xx errors except 429 (rate limit)
-        if (error?.status >= 400 && error?.status < 500 && error?.status !== 429) {
-          return false;
-        }
-        return failureCount < 3;
-      },
-      refetchOnWindowFocus: false, // Reduce unnecessary network calls
-    },
-    mutations: {
-      retry: 1,
-    },
-  },
-});
-
-// Global error handler for React Query - correct event handling
-queryClient.getQueryCache().subscribe((event) => {
-  if (event.type === 'updated' && event.query.state.status === 'error') {
-    logger.error('React Query error', { 
-      error: event.query.state.error, 
-      queryKey: event.query.queryKey 
-    });
-  }
-});
 
 function App() {
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Router>
             <div className="min-h-screen bg-background">
@@ -125,7 +93,6 @@ function App() {
         </AuthProvider>
         <Toaster />
         {isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
-      </QueryClientProvider>
     </ErrorBoundary>
   );
 }
