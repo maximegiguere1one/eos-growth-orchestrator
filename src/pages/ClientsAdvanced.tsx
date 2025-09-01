@@ -9,21 +9,22 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { ClientKPICards } from "@/components/clients/ClientKPICards";
 import { ClientFiltersBar } from "@/components/clients/ClientFiltersBar";
 import { ClientTable } from "@/components/clients/ClientTable";
+import { ClientCard } from "@/components/clients/ClientCard";
+import { ClientDrawer } from "@/components/clients/ClientDrawer";
+import { BulkActionsBar } from "@/components/clients/BulkActionsBar";
+import { CreateVideoDialog } from "@/components/clients/CreateVideoDialog";
+import { AdjustQuotaDialog } from "@/components/clients/AdjustQuotaDialog";
 import { CreateClientDialog } from "@/components/clients/CreateClientDialog";
 import { useClientsAdvanced, ClientFilters, ClientAdvanced } from "@/hooks/useClientsAdvanced";
 import { 
   Plus, 
   Video, 
-  Ticket, 
+  AlertTriangle, 
   Upload, 
   Users, 
-  AlertTriangle,
-  UserPlus,
-  Play,
-  Pause,
-  Archive,
-  Layout,
-  Grid3X3
+  LayoutGrid, 
+  List,
+  Filter
 } from "lucide-react";
 
 const ClientsAdvanced = () => {
@@ -32,6 +33,10 @@ const ClientsAdvanced = () => {
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [page, setPage] = useState(0);
+  const [selectedClient, setSelectedClient] = useState<ClientAdvanced | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [quotaDialogOpen, setQuotaDialogOpen] = useState(false);
+  const [quotaDialogClient, setQuotaDialogClient] = useState<ClientAdvanced | null>(null);
 
   // Appliquer le filtre de tab au filtre global
   const tabFilters = useMemo(() => {
@@ -69,18 +74,40 @@ const ClientsAdvanced = () => {
   const totalClients = clientsData?.total || 0;
 
   const handleClientClick = (client: ClientAdvanced) => {
-    console.log("Opening client drawer:", client);
-    // TODO: Implémenter l'ouverture du drawer
+    setSelectedClient(client);
+    setDrawerOpen(true);
   };
 
-  const handleSaveView = () => {
-    console.log("Saving current view:", { filters, activeTab });
-    // TODO: Implémenter la sauvegarde de vue
+  const handleSaveView = (name: string) => {
+    console.log('Save view:', name);
   };
 
   const handleBulkAction = (action: string) => {
-    console.log("Bulk action:", action, "for clients:", selectedClients);
-    // TODO: Implémenter les actions de masse
+    console.log('Bulk action:', action, selectedClients);
+  };
+
+  const handleNewVideo = (clientId: string) => {
+    console.log('Create video for client:', clientId);
+  };
+
+  const handleCreateTicket = (clientId: string) => {
+    console.log('Create ticket for client:', clientId);
+  };
+
+  const handleAdjustQuota = (clientId: string) => {
+    const client = clients?.find(c => c.id === clientId);
+    if (client) {
+      setQuotaDialogClient(client);
+      setQuotaDialogOpen(true);
+    }
+  };
+
+  const handleAssignAM = (clientId: string) => {
+    console.log('Assign AM for client:', clientId);
+  };
+
+  const handleToggleStatus = (clientId: string, status: string) => {
+    console.log('Toggle status for client:', clientId, status);
   };
 
   const getTabCounts = () => {
@@ -120,24 +147,26 @@ const ClientsAdvanced = () => {
           <p className="text-muted-foreground">Cockpit opérationnel et suivi des comptes</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Upload className="h-4 w-4 mr-2" />
+            Importer CSV
+          </Button>
+          <CreateVideoDialog>
+            <Button variant="outline" size="sm">
+              <Video className="h-4 w-4 mr-2" />
+              Nouvelle Vidéo
+            </Button>
+          </CreateVideoDialog>
+          <Button variant="outline" size="sm">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            Nouveau Ticket
+          </Button>
           <CreateClientDialog>
-            <Button variant="premium">
+            <Button>
               <Plus className="h-4 w-4 mr-2" />
               Nouveau Client
             </Button>
           </CreateClientDialog>
-          <Button variant="outline">
-            <Video className="h-4 w-4 mr-2" />
-            Nouvelle Vidéo
-          </Button>
-          <Button variant="outline">
-            <Ticket className="h-4 w-4 mr-2" />
-            Nouveau Ticket
-          </Button>
-          <Button variant="outline">
-            <Upload className="h-4 w-4 mr-2" />
-            Importer CSV
-          </Button>
         </div>
       </div>
 
@@ -148,46 +177,20 @@ const ClientsAdvanced = () => {
       <ClientFiltersBar 
         filters={filters}
         onFiltersChange={setFilters}
-        onSaveView={handleSaveView}
+        onSaveView={() => handleSaveView('Vue actuelle')}
       />
 
-      {/* Actions de masse */}
-      {selectedClients.length > 0 && (
-        <div className="bg-muted/50 border rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">
-                {selectedClients.length} client(s) sélectionné(s)
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => handleBulkAction('assign_am')}>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Assigner AM
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => handleBulkAction('pause')}>
-                <Pause className="h-4 w-4 mr-2" />
-                Mettre en pause
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => handleBulkAction('activate')}>
-                <Play className="h-4 w-4 mr-2" />
-                Activer
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => handleBulkAction('export')}>
-                <Upload className="h-4 w-4 mr-2" />
-                Exporter
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setSelectedClients([])}
-              >
-                Annuler
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Bulk Actions */}
+      <BulkActionsBar
+        selectedCount={selectedClients.length}
+        onClearSelection={() => setSelectedClients([])}
+        onAssignAM={() => handleBulkAction('assign_am')}
+        onToggleStatus={(action) => handleBulkAction(`toggle_${action}`)}
+        onAdjustQuota={() => handleBulkAction('adjust_quota')}
+        onSendReport={() => handleBulkAction('send_report')}
+        onExportCsv={() => handleBulkAction('export_csv')}
+        onArchive={() => handleBulkAction('archive')}
+      />
 
       {/* Tabs et vue */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -250,14 +253,14 @@ const ClientsAdvanced = () => {
               size="sm"
               onClick={() => setViewMode('table')}
             >
-              <Layout className="h-4 w-4" />
+              <List className="h-4 w-4" />
             </Button>
             <Button
               variant={viewMode === 'cards' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('cards')}
             >
-              <Grid3X3 className="h-4 w-4" />
+              <LayoutGrid className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -274,7 +277,7 @@ const ClientsAdvanced = () => {
               }
             />
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {viewMode === 'table' ? (
                 <ClientTable
                   clients={clients}
@@ -283,17 +286,23 @@ const ClientsAdvanced = () => {
                   onClientClick={handleClientClick}
                 />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* TODO: Implémenter ClientCards */}
-                  <div className="text-muted-foreground text-center py-8">
-                    Vue cartes à implémenter
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {clients.map((client) => (
+                    <ClientCard
+                      key={client.id}
+                      client={client}
+                      onSelect={handleClientClick}
+                      onNewVideo={handleNewVideo}
+                      onCreateTicket={handleCreateTicket}
+                      onAdjustQuota={handleAdjustQuota}
+                    />
+                  ))}
                 </div>
               )}
 
               {/* Pagination */}
               {totalClients > 50 && (
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center gap-4 mt-6">
                   <Button
                     variant="outline"
                     onClick={() => setPage(p => Math.max(0, p - 1))}
@@ -301,7 +310,7 @@ const ClientsAdvanced = () => {
                   >
                     Précédent
                   </Button>
-                  <span className="mx-4 text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground">
                     Page {page + 1} sur {Math.ceil(totalClients / 50)}
                   </span>
                   <Button
@@ -317,6 +326,25 @@ const ClientsAdvanced = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Client Drawer */}
+      <ClientDrawer
+        client={selectedClient}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onNewVideo={handleNewVideo}
+        onCreateTicket={handleCreateTicket}
+        onAdjustQuota={handleAdjustQuota}
+        onAssignAM={handleAssignAM}
+        onToggleStatus={handleToggleStatus}
+      />
+
+      {/* Adjust Quota Dialog */}
+      <AdjustQuotaDialog
+        client={quotaDialogClient}
+        open={quotaDialogOpen}
+        onOpenChange={setQuotaDialogOpen}
+      />
     </div>
   );
 };
