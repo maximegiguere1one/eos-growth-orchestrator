@@ -15,6 +15,7 @@ interface EnvironmentConfig {
   POSTHOG_HOST?: string;
   SENTRY_DSN?: string;
   HONEYCOMB_API_KEY?: string;
+  HONEYCOMB_ENDPOINT?: string;
   
   // Feature flags
   ENABLE_ANALYTICS: boolean;
@@ -42,6 +43,7 @@ function validateEnvironment(): EnvironmentConfig {
     POSTHOG_HOST: import.meta.env.VITE_POSTHOG_HOST || 'https://app.posthog.com',
     SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
     HONEYCOMB_API_KEY: import.meta.env.VITE_HONEYCOMB_API_KEY,
+    HONEYCOMB_ENDPOINT: import.meta.env.VITE_HONEYCOMB_ENDPOINT || 'https://api.honeycomb.io/v1/traces',
     
     // Feature flags
     ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
@@ -72,6 +74,9 @@ function validateEnvironment(): EnvironmentConfig {
     new URL(config.SUPABASE_URL);
     if (config.POSTHOG_HOST) {
       new URL(config.POSTHOG_HOST);
+    }
+    if (config.HONEYCOMB_ENDPOINT) {
+      new URL(config.HONEYCOMB_ENDPOINT);
     }
   } catch (error) {
     throw new Error(`Invalid URL in environment configuration: ${error}`);
