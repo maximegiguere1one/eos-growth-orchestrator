@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Client {
@@ -62,5 +62,26 @@ export const useClientQuotas = () => {
       });
     },
     staleTime: 2 * 60 * 1000,
+  });
+};
+
+export const useCreateClient = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (clientData: { name: string; monthly_quota: number; is_active: boolean }) => {
+      const { data, error } = await supabase
+        .from('clients')
+        .insert(clientData)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['client-quotas'] });
+    },
   });
 };
