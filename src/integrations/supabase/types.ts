@@ -385,6 +385,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      seed_current_user_demo: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       seed_demo_data: {
         Args: { _actor: string }
         Returns: undefined

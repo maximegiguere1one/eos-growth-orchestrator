@@ -1,365 +1,132 @@
 
-# EOS Application
+# EOS Management System
 
-A production-ready React application for managing EOS (Entrepreneurial Operating System) processes including rocks, issues, KPIs, meetings, and scorecards.
+A production-ready EOS (Entrepreneurial Operating System) management application built with React 18, TypeScript, and Supabase.
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 20+ 
-- npm or yarn
-- Supabase account
-
-### One-Command Setup
-
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd eos-app
-
-# Install dependencies
+# Clone and install
+git clone <repo-url>
+cd eos-management
 npm install
 
-# Copy environment file and configure
+# Environment setup
 cp .env.example .env.local
+# Fill in your environment variables (see table below)
 
-# Start development server
+# Start development
 npm run dev
+
+# Run tests
+npm test
+npm run test:e2e
+
+# Build for production
+npm run build
 ```
 
 ## 📋 Environment Variables
 
 | Variable | Description | Required | Example |
 |----------|-------------|----------|---------|
-| `VITE_SUPABASE_URL` | Your Supabase project URL | ✅ | `https://xxx.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key | ✅ | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
-| `VITE_POSTHOG_KEY` | PostHog analytics key | ❌ | `phc_xxx` |
-| `VITE_POSTHOG_HOST` | PostHog host URL | ❌ | `https://app.posthog.com` |
-| `VITE_SENTRY_DSN` | Sentry error tracking DSN | ❌ | `https://xxx@sentry.io/xxx` |
-| `VITE_APP_ENV` | Application environment | ❌ | `development` |
-| `VITE_APP_VERSION` | Application version | ❌ | `1.0.0` |
-| `VITE_APP_BASE_URL` | Base URL for the app | ❌ | `http://localhost:5173` |
+| `VITE_SUPABASE_URL` | Supabase project URL | ✅ | `https://xxx.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon key | ✅ | `eyJhbGciOiJIUzI1NiIs...` |
+| `VITE_POSTHOG_KEY` | PostHog API key | ✅ | `phc_xxx` |
+| `VITE_POSTHOG_HOST` | PostHog host | ✅ | `https://app.posthog.com` |
+| `VITE_SENTRY_DSN` | Sentry DSN for error tracking | ✅ | `https://xxx@sentry.io/xxx` |
+| `VITE_APP_ENV` | Environment (dev/staging/prod) | ✅ | `production` |
 
 ## 🏗️ Architecture
 
-### Tech Stack
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
-- **UI Components**: shadcn/ui, Radix UI
-- **State Management**: Zustand, React Query
-- **Backend**: Supabase (PostgreSQL + Auth + Realtime)
-- **Analytics**: PostHog
-- **Error Tracking**: Sentry
-- **Testing**: Vitest, Testing Library, Playwright
-- **CI/CD**: GitHub Actions
-- **Deployment**: Vercel
+This application follows a modern React architecture with:
+- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth + Realtime + Storage)
+- **State Management**: React Query + Zustand (minimal)
+- **Testing**: Vitest + Testing Library + Playwright
+- **Observability**: Sentry + PostHog + OpenTelemetry
+- **CI/CD**: GitHub Actions with staging/production deployments
 
-### System Architecture
-
-```mermaid
-graph TB
-    A[React App] --> B[Supabase Auth]
-    A --> C[Supabase Database]
-    A --> D[PostHog Analytics]
-    A --> E[Sentry Error Tracking]
-    
-    B --> F[Row Level Security]
-    C --> F
-    C --> G[Realtime Subscriptions]
-    
-    H[GitHub Actions] --> I[Vercel Deployment]
-    H --> J[E2E Tests]
-    H --> K[Unit Tests]
-```
-
-### Database Schema
-
-```mermaid
-erDiagram
-    profiles ||--o{ user_roles : has
-    user_roles ||--o{ eos_issues : creates
-    user_roles ||--o{ eos_rocks : creates
-    user_roles ||--o{ eos_kpis : creates
-    user_roles ||--o{ eos_meetings : creates
-    
-    eos_kpis ||--o{ eos_kpi_values : tracks
-    eos_meetings ||--o{ eos_meeting_notes : contains
-    
-    profiles {
-        uuid id PK
-        text email
-        text display_name
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    user_roles {
-        uuid id PK
-        uuid user_id FK
-        app_role role
-        timestamp created_at
-    }
-    
-    eos_issues {
-        uuid id PK
-        text title
-        text description
-        uuid created_by FK
-        uuid assigned_to FK
-        issue_status status
-        int priority
-        timestamp resolved_at
-        timestamp archived_at
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    eos_rocks {
-        uuid id PK
-        text title
-        text description
-        uuid owner_id FK
-        uuid created_by FK
-        rock_status status
-        numeric progress
-        date start_date
-        date due_date
-        timestamp completed_at
-        timestamp archived_at
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    eos_kpis {
-        uuid id PK
-        text name
-        text unit
-        text direction
-        numeric target
-        int position
-        boolean is_active
-        uuid created_by FK
-        timestamp archived_at
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    eos_kpi_values {
-        uuid id PK
-        uuid kpi_id FK
-        date week_start_date
-        numeric value
-        uuid created_by FK
-        timestamp created_at
-        timestamp updated_at
-    }
-```
-
-## 🛠️ Development
-
-### Available Scripts
+## 🔧 Available Scripts
 
 ```bash
-# Development
-npm run dev              # Start dev server
-npm run build           # Build for production
-npm run preview         # Preview production build
-
-# Code Quality
-npm run lint            # Run ESLint
-npm run lint:fix        # Fix ESLint issues
-npm run format          # Format with Prettier
-npm run type-check      # TypeScript checking
-
-# Testing
-npm run test            # Run unit tests
-npm run test:ui         # Run tests with UI
-npm run test:coverage   # Run tests with coverage
-npm run test:e2e        # Run E2E tests
-npm run test:e2e:ui     # Run E2E tests with UI
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run test         # Run unit tests
+npm run test:ui      # Run tests with UI
+npm run test:coverage # Run tests with coverage report
+npm run test:e2e     # Run end-to-end tests
+npm run lint         # Lint code
+npm run format       # Format code with Prettier
+npm run typecheck    # Run TypeScript checks
+npm run db:seed      # Seed database with demo data
 ```
 
-### Code Style & Standards
+## 📁 Project Structure
 
-- **TypeScript**: Strict mode enabled with additional checks
-- **ESLint**: Configured for React and TypeScript
-- **Prettier**: Consistent code formatting
-- **Husky**: Pre-commit hooks for quality gates
-- **Conventional Commits**: Standardized commit messages
+```
+├── docs/                    # Documentation
+├── e2e/                     # E2E tests (Playwright)
+├── infrastructure/          # Infrastructure configs
+├── public/                  # Static assets
+├── src/
+│   ├── analytics/          # PostHog integration
+│   ├── components/         # React components
+│   │   ├── auth/          # Authentication components
+│   │   ├── common/        # Shared components
+│   │   ├── eos/           # EOS-specific components
+│   │   ├── layout/        # Layout components
+│   │   └── ui/            # UI library (shadcn/ui)
+│   ├── contexts/          # React contexts
+│   ├── features/          # Feature-based modules
+│   ├── hooks/             # Custom hooks
+│   ├── lib/               # Utilities and configurations
+│   ├── locales/           # i18n translations
+│   ├── pages/             # Route components
+│   ├── store/             # Zustand stores
+│   └── types/             # TypeScript type definitions
+└── supabase/              # Supabase migrations and config
+```
 
-### Testing Strategy
+## 🌍 Internationalization
 
-1. **Unit Tests** (Vitest + Testing Library)
-   - Business logic functions
-   - React hooks
-   - Utility functions
-   - Target: 85%+ coverage
+The app supports English and French (Canadian):
+- Default: French (Canadian) - `fr-CA`
+- Fallback: English - `en`
 
-2. **Component Tests** (Testing Library)
-   - User interactions
-   - Form validation
-   - State management
-   - Accessibility
+## 🔐 Security
 
-3. **Integration Tests**
-   - API integration
-   - Database operations
-   - Authentication flows
-
-4. **E2E Tests** (Playwright)
-   - Critical user journeys
-   - Cross-browser testing
-   - Mobile responsiveness
-
-## 🔒 Security
-
-### Authentication & Authorization
-- Supabase Auth with email/password
-- Row Level Security (RLS) policies
-- Role-based access control (RBAC)
-- Session management with auto-refresh
-
-### Security Headers & Policies
-- Content Security Policy (CSP)
-- CORS configuration
+- Row Level Security (RLS) enabled on all tables
 - Input validation with Zod schemas
-- XSS protection
+- OWASP security headers implemented
+- Secrets managed through environment variables
+- Authentication via Supabase Auth
 
-### Data Protection
-- GDPR compliant data handling
-- Quebec Law 25 considerations
-- Audit logging for all operations
-- Data retention policies
+## 📊 Monitoring & Analytics
 
-## 📊 Observability
+- **Error Tracking**: Sentry with source maps
+- **Product Analytics**: PostHog with custom events
+- **Performance**: Core Web Vitals monitoring
+- **Logs**: Structured logging with OpenTelemetry
 
-### Analytics (PostHog)
-- User behavior tracking
-- Feature usage analytics
-- Conversion funnel analysis
-- A/B testing capabilities
+## 🚢 Deployment
 
-### Error Tracking (Sentry)
-- Real-time error monitoring
-- Performance monitoring
-- Release tracking
-- Source map upload
+The application is configured for deployment on:
+- **Frontend**: Vercel/Netlify
+- **Backend**: Supabase
+- **CI/CD**: GitHub Actions
 
-### Logging
-- Structured logging with context
-- Performance metrics
-- User action tracking
-- Environment-specific log levels
+See `docs/DEPLOYMENT.md` for detailed deployment instructions.
 
-## 🚀 Deployment
+## 🤝 Contributing
 
-### Environments
-
-1. **Development** (localhost:5173)
-   - Local development
-   - Hot reloading
-   - Debug tools enabled
-
-2. **Staging** (staging.app.com)
-   - Production-like environment
-   - E2E testing
-   - Feature previews
-
-3. **Production** (app.com)
-   - Live application
-   - Performance monitoring
-   - Error tracking
-
-### CI/CD Pipeline
-
-```mermaid
-graph LR
-    A[Push/PR] --> B[CI Tests]
-    B --> C[Build]
-    C --> D{Branch?}
-    D -->|main| E[Deploy Staging]
-    D -->|pr| F[Preview Deploy]
-    E --> G[E2E Tests]
-    G --> H[Manual Approval]
-    H --> I[Deploy Production]
-```
-
-### Deployment Commands
-
-```bash
-# Deploy to staging (automatic on main push)
-git push origin main
-
-# Deploy to production (manual approval required)
-gh workflow run "Deploy to Production" -f confirm=deploy
-```
-
-## 🎯 Performance
-
-### Core Web Vitals Targets
-- **LCP** (Largest Contentful Paint): < 2.5s
-- **INP** (Interaction to Next Paint): < 200ms  
-- **CLS** (Cumulative Layout Shift): < 0.1
-
-### Optimization Strategies
-- Route-based code splitting
-- Image optimization
-- Bundle analysis
-- React Query caching
-- Preconnect to external domains
-
-## 🌐 Internationalization
-
-### Supported Locales
-- **fr-CA**: French (Canada) - Default
-- **en**: English
-
-### Implementation
-- React Intl for message formatting
-- Date/number localization
-- RTL support ready
-- Dynamic locale switching
-
-## 📚 Documentation
-
-- [Architecture](./docs/ARCHITECTURE.md)
-- [Security](./docs/SECURITY.md) 
-- [Observability](./docs/OBSERVABILITY.md)
-- [Development](./docs/DEVELOPMENT.md)
-- [API Documentation](./docs/API.md)
-
-## 🆘 Support & Troubleshooting
-
-### Common Issues
-
-1. **Build Failures**
-   ```bash
-   # Clear node_modules and reinstall
-   rm -rf node_modules package-lock.json
-   npm install
-   ```
-
-2. **TypeScript Errors**
-   ```bash
-   # Run type check for detailed errors
-   npm run type-check
-   ```
-
-3. **Test Failures**
-   ```bash
-   # Run tests in watch mode for debugging
-   npm run test -- --watch
-   ```
-
-### Getting Help
-
-- Check [GitHub Issues](../../issues)
-- Review [Documentation](./docs/)
-- Contact development team
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `npm test && npm run test:e2e`
+5. Submit a pull request
 
 ## 📄 License
 
-This project is proprietary and confidential.
-
----
-
-**Built with ❤️ using modern web technologies**
+MIT License - see LICENSE file for details.

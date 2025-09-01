@@ -1,0 +1,528 @@
+
+openapi: 3.0.3
+info:
+  title: EOS Management API
+  description: |
+    REST API for the EOS (Entrepreneurial Operating System) Management application.
+    
+    This API provides endpoints for managing EOS entities including Issues, Rocks, KPIs, Todos, and Meetings.
+    All endpoints require authentication via Supabase Auth JWT tokens.
+    
+  version: 1.0.0
+  contact:
+    name: EOS Management Team
+    email: support@eos-management.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://xflfbousrubboovxhmwi.supabase.co/rest/v1
+    description: Production Supabase API
+  - url: https://staging-project.supabase.co/rest/v1
+    description: Staging Supabase API
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth JWT token
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+      description: Supabase anon key
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+        details:
+          type: object
+          description: Additional error details
+
+    Issue:
+      type: object
+      required:
+        - id
+        - title
+        - priority
+        - status
+        - created_by
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier
+        title:
+          type: string
+          maxLength: 200
+          description: Issue title
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Detailed description
+        priority:
+          type: integer
+          minimum: 0
+          maximum: 10
+          description: Priority level (0-10)
+        status:
+          type: string
+          enum: [open, resolved]
+          description: Current status
+        assigned_to:
+          type: string
+          format: uuid
+          nullable: true
+          description: Assigned user ID
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Resolution timestamp
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Archive timestamp
+        created_by:
+          type: string
+          format: uuid
+          description: Creator user ID
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    Rock:
+      type: object
+      required:
+        - id
+        - title
+        - progress
+        - status
+        - created_by
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+        owner_id:
+          type: string
+          format: uuid
+          nullable: true
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Completion percentage
+        status:
+          type: string
+          enum: [not_started, on_track, at_risk, completed]
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    KPI:
+      type: object
+      required:
+        - id
+        - name
+        - direction
+        - position
+        - is_active
+        - created_by
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        unit:
+          type: string
+          maxLength: 20
+          nullable: true
+        direction:
+          type: string
+          enum: [up, down]
+          description: Target direction for improvement
+        target:
+          type: number
+          nullable: true
+          description: Target value
+        position:
+          type: integer
+          minimum: 0
+          description: Display order
+        is_active:
+          type: boolean
+          description: Whether KPI is currently tracked
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    KPIValue:
+      type: object
+      required:
+        - id
+        - kpi_id
+        - week_start_date
+        - value
+        - created_by
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        kpi_id:
+          type: string
+          format: uuid
+        week_start_date:
+          type: string
+          format: date
+          description: Monday of the week
+        value:
+          type: number
+          description: Measured value for the week
+        created_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Todo:
+      type: object
+      required:
+        - id
+        - description
+        - created_by
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+          maxLength: 500
+        assigned_to:
+          type: string
+          format: uuid
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+paths:
+  /eos_issues:
+    get:
+      summary: List issues
+      description: Retrieve paginated list of issues for the authenticated user
+      parameters:
+        - name: select
+          in: query
+          schema:
+            type: string
+          example: "id,title,priority,status,created_at"
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "priority.desc,created_at.desc"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+          example: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          example: 0
+      responses:
+        '200':
+          description: List of issues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create issue
+      description: Create a new issue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - priority
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                description:
+                  type: string
+                  maxLength: 1000
+                priority:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                assigned_to:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Issue created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /eos_issues/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    patch:
+      summary: Update issue
+      description: Update an existing issue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                description:
+                  type: string
+                  maxLength: 1000
+                priority:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                status:
+                  type: string
+                  enum: [open, resolved]
+                assigned_to:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Issue updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '404':
+          description: Issue not found
+        '403':
+          description: Not authorized to update this issue
+
+  /eos_rocks:
+    get:
+      summary: List rocks
+      parameters:
+        - name: select
+          in: query
+          schema:
+            type: string
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "created_at.desc"
+      responses:
+        '200':
+          description: List of rocks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rock'
+
+    post:
+      summary: Create rock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - progress
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                description:
+                  type: string
+                  maxLength: 1000
+                owner_id:
+                  type: string
+                  format: uuid
+                progress:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                status:
+                  type: string
+                  enum: [not_started, on_track, at_risk, completed]
+                start_date:
+                  type: string
+                  format: date
+                due_date:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Rock created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rock'
+
+  /rpc/seed_current_user_demo:
+    post:
+      summary: Seed demo data
+      description: |
+        Seed the current authenticated user with demo data including sample KPIs, 
+        rocks, issues, todos, and meetings. This is safe to call multiple times 
+        as it only creates data that doesn't already exist.
+      responses:
+        '200':
+          description: Demo data seeded successfully
+        '401':
+          description: Not authenticated
+        '500':
+          description: Server error during seeding
+
+tags:
+  - name: Issues
+    description: EOS Issues management
+  - name: Rocks
+    description: EOS Rocks (quarterly objectives) management
+  - name: KPIs
+    description: Key Performance Indicators management
+  - name: Todos
+    description: Todo items management
+  - name: Meetings
+    description: EOS Meeting management
+  - name: Utils
+    description: Utility functions

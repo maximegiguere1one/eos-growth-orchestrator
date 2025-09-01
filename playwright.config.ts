@@ -2,6 +2,8 @@
 import { defineConfig, devices } from '@playwright/test';
 import { env } from './src/config/environment';
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -11,11 +13,16 @@ export default defineConfig({
   reporter: [
     ['html'],
     ['json', { outputFile: 'playwright-report/results.json' }],
+    ['junit', { outputFile: 'playwright-report/results.xml' }],
   ],
   use: {
-    baseURL: env.VITE_APP_BASE_URL,
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    // Global test timeout
+    actionTimeout: 10000,
+    navigationTimeout: 30000,
   },
 
   projects: [
@@ -35,11 +42,20 @@ export default defineConfig({
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
     },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
   ],
 
-  webServer: {
+  webServer: process.env.CI ? undefined : {
     command: 'npm run dev',
-    url: env.VITE_APP_BASE_URL,
+    port: 5173,
     reuseExistingServer: !process.env.CI,
+    env: {
+      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || env.SUPABASE_URL,
+      VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY,
+      VITE_APP_ENV: 'test',
+    },
   },
 });
