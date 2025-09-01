@@ -11,9 +11,29 @@ interface LogContext {
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-class Logger {
-  private sessionId = crypto.randomUUID();
+interface ILogger {
+  setContext(context: Partial<LogContext>): void;
+  debug(message: string, data?: any): void;
+  info(message: string, data?: any): void;
+  warn(message: string, data?: any): void;
+  error(message: string, error?: Error | any): void;
+}
+
+class Logger implements ILogger {
+  private sessionId: string;
   private context: LogContext = {};
+
+  constructor() {
+    try {
+      // Use crypto.randomUUID() if available, fallback for older browsers
+      this.sessionId = typeof crypto !== 'undefined' && crypto.randomUUID 
+        ? crypto.randomUUID() 
+        : `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    } catch (error) {
+      // Fallback if crypto is not available
+      this.sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+  }
 
   setContext(context: Partial<LogContext>) {
     this.context = { ...this.context, ...context };
@@ -77,7 +97,23 @@ class Logger {
   }
 }
 
-export const logger = new Logger();
+// Safe logger initialization
+let logger: ILogger;
+try {
+  logger = new Logger();
+} catch (error) {
+  console.warn('Logger initialization failed, using fallback:', error);
+  // Create a minimal fallback logger
+  logger = {
+    setContext: () => {},
+    debug: (msg: string) => console.log('[DEBUG]', msg),
+    info: (msg: string) => console.log('[INFO]', msg),
+    warn: (msg: string) => console.warn('[WARN]', msg),
+    error: (msg: string, err?: any) => console.error('[ERROR]', msg, err),
+  };
+}
+
+export { logger };
 
 // Performance monitoring
 export class PerformanceMonitor {
