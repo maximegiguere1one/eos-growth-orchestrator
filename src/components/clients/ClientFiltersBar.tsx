@@ -19,7 +19,9 @@ import {
   Target,
   Zap,
   Save,
-  MoreHorizontal
+  MoreHorizontal,
+  DollarSign,
+  TrendingUp
 } from "lucide-react";
 
 interface ClientFiltersBarProps {

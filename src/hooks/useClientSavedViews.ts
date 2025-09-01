@@ -16,18 +16,17 @@ export interface SavedView {
   updated_at: string;
 }
 
+// For now, we'll use localStorage until the database types are updated
 export const useClientSavedViews = () => {
   return useQuery({
     queryKey: ['client-saved-views'],
     queryFn: async (): Promise<SavedView[]> => {
-      const { data, error } = await supabase
-        .from('client_saved_views')
-        .select('*')
-        .order('is_default', { ascending: false })
-        .order('name');
-
-      if (error) throw error;
-      return data as SavedView[];
+      // Temporary implementation using localStorage
+      const saved = localStorage.getItem('client-saved-views');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      return [];
     },
     staleTime: 10 * 60 * 1000,
   });
@@ -43,26 +42,26 @@ export const useSaveView = () => {
       params: any;
       is_default?: boolean;
     }) => {
-      // Si c'est une vue par défaut, désactiver les autres
+      // Temporary implementation using localStorage
+      const saved = localStorage.getItem('client-saved-views');
+      const views: SavedView[] = saved ? JSON.parse(saved) : [];
+      
       if (viewData.is_default) {
-        await supabase
-          .from('client_saved_views')
-          .update({ is_default: false })
-          .neq('id', '00000000-0000-0000-0000-000000000000'); // Éviter les conflits
+        views.forEach(view => view.is_default = false);
       }
 
-      const { data, error } = await supabase
-        .from('client_saved_views')
-        .insert({
-          name: viewData.name,
-          params: viewData.params,
-          is_default: viewData.is_default || false
-        })
-        .select()
-        .single();
+      const newView: SavedView = {
+        id: crypto.randomUUID(),
+        name: viewData.name,
+        params: viewData.params,
+        is_default: viewData.is_default || false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
-      return data;
+      views.push(newView);
+      localStorage.setItem('client-saved-views', JSON.stringify(views));
+      return newView;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['client-saved-views'] });
@@ -80,12 +79,11 @@ export const useDeleteSavedView = () => {
 
   return useMutation({
     mutationFn: async (viewId: string) => {
-      const { error } = await supabase
-        .from('client_saved_views')
-        .delete()
-        .eq('id', viewId);
-
-      if (error) throw error;
+      // Temporary implementation using localStorage
+      const saved = localStorage.getItem('client-saved-views');
+      const views: SavedView[] = saved ? JSON.parse(saved) : [];
+      const filtered = views.filter(view => view.id !== viewId);
+      localStorage.setItem('client-saved-views', JSON.stringify(filtered));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['client-saved-views'] });
