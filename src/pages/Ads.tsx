@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -145,6 +144,7 @@ const Ads = () => {
         <CardContent>
           {!campaigns || campaigns.length === 0 ? (
             <EmptyState
+              icon={Target}
               title="Aucune campagne"
               description="Commencez par créer votre première campagne publicitaire."
             />
