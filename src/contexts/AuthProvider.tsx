@@ -1,11 +1,11 @@
 
 import { createContext, useContext, useEffect, ReactNode } from 'react';
-import { AuthService, supabase } from '@/lib/auth';
+import { authService, type AuthUser } from '@/lib/auth';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/store/authStore';
-import type { AuthUser } from '@/lib/auth';
 
 interface AuthContextValue {
-  user: AuthUser | null;
+  user: AuthUser;
   isLoading: boolean;
   isInitialized: boolean;
   signIn: (email: string, password: string) => Promise<void>;
@@ -42,9 +42,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('Auth state changed:', event, session?.user?.email);
 
         if (session?.user) {
-          // Get updated user data with roles
+          // Get updated user data
           try {
-            const authUser = await AuthService.getCurrentUser();
+            const authUser = await authService.getCurrentUser();
             setUser(authUser);
           } catch (error) {
             console.error('Error getting current user:', error);
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
 
     // Get initial session
-    AuthService.getCurrentUser()
+    authService.getCurrentUser()
       .then((authUser) => {
         if (mounted) {
           setUser(authUser);
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      await AuthService.signIn(email, password);
+      await authService.signIn(email, password);
       // User state will be updated by the auth state change listener
     } finally {
       setLoading(false);
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signUp = async (email: string, password: string, displayName?: string) => {
     setLoading(true);
     try {
-      await AuthService.signUp(email, password, displayName);
+      await authService.signUp(email, password, displayName);
       // User state will be updated by the auth state change listener
     } finally {
       setLoading(false);
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOut = async () => {
     setLoading(true);
     try {
-      await AuthService.signOut();
+      await authService.signOut();
       clearAuth();
     } finally {
       setLoading(false);
@@ -116,7 +116,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const resetPassword = async (email: string) => {
-    await AuthService.resetPassword(email);
+    await authService.resetPassword(email);
   };
 
   const value: AuthContextValue = {
@@ -131,3 +131,4 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
