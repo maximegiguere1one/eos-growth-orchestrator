@@ -1,3 +1,14 @@
+# EOS Management Platform
+
+A comprehensive web application for implementing and managing the Entrepreneurial Operating System (EOS) methodology.
+
+## 📋 Project Documentation
+
+- **[Knowledge Base](./KNOWLEDGE_BASE.md)** - Mission, vision, technical stack, and persistent project context
+- **[Project Requirements Document](./PRD.md)** - Detailed specifications, user stories, and implementation blueprint
+
+---
+
 # Welcome to your Lovable project
 
 ## Project info
