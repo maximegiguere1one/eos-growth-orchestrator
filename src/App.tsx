@@ -1,42 +1,44 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { Skeleton } from "@/components/ui/skeleton";
-import { PerformanceProvider } from "@/components/performance/PerformanceProvider";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/contexts/AuthProvider';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
+import { analytics } from '@/analytics/posthog';
+import { logger } from '@/lib/observability';
+import { isDevelopment } from '@/config/environment';
+
+// Initialize analytics
+analytics.init();
 
 // Lazy load pages for better performance
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Clients = lazy(() => import("./pages/Clients"));
-const Videos = lazy(() => import("./pages/Videos"));
-const Ads = lazy(() => import("./pages/Ads"));
-const EOS = lazy(() => import("./pages/EOS"));
-const EOSIssues = lazy(() => import("./pages/EOSIssues"));
-const EOSRocks = lazy(() => import("./pages/EOSRocks"));
-const EOSMeetings = lazy(() => import("./pages/EOSMeetings"));
-const Scorecard = lazy(() => import("./pages/Scorecard"));
-const Auth = lazy(() => import("./pages/Auth"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const AuthPage = lazy(() => import('@/pages/AuthPage'));
+const EOS = lazy(() => import('@/pages/EOS'));
+const EOSIssues = lazy(() => import('@/pages/EOSIssues'));
+const EOSRocks = lazy(() => import('@/pages/EOSRocks'));
+const EOSMeetings = lazy(() => import('@/pages/EOSMeetings'));
+const Scorecard = lazy(() => import('@/pages/Scorecard'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
 
-// Optimized QueryClient configuration
+// Create React Query client with production-ready config
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30 * 1000, // 30 seconds default
-      gcTime: 5 * 60 * 1000, // 5 minutes default
-      refetchOnWindowFocus: false, // Reduce unnecessary refetches
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
       retry: (failureCount, error: any) => {
-        // Smart retry logic
-        if (error?.status === 404) return false;
-        return failureCount < 2;
+        // Don't retry on 4xx errors
+        if (error?.status >= 400 && error?.status < 500) {
+          return false;
+        }
+        return failureCount < 3;
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      refetchOnWindowFocus: false,
     },
     mutations: {
       retry: 1,
@@ -44,61 +46,83 @@ const queryClient = new QueryClient({
   },
 });
 
-// Page loading skeleton
-const PageSkeleton = () => (
-  <div className="space-y-6">
-    <div className="space-y-2">
-      <Skeleton className="h-8 w-64" />
-      <Skeleton className="h-4 w-96" />
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-32" />
-      ))}
-    </div>
-    <Skeleton className="h-64 w-full" />
-  </div>
-);
+// Global error handler for React Query
+queryClient.getQueryCache().subscribe((event) => {
+  if (event.type === 'error') {
+    logger.error('React Query error', { error: event.error, query: event.query });
+  }
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={
-              <Suspense fallback={<PageSkeleton />}>
-                <Auth />
+function App() {
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen bg-background">
+              <Suspense fallback={<LoadingSkeleton />}>
+                <Routes>
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/eos"
+                    element={
+                      <ProtectedRoute>
+                        <EOS />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/eos/issues"
+                    element={
+                      <ProtectedRoute>
+                        <EOSIssues />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/eos/rocks"
+                    element={
+                      <ProtectedRoute>
+                        <EOSRocks />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/eos/meetings"
+                    element={
+                      <ProtectedRoute>
+                        <EOSMeetings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/scorecard"
+                    element={
+                      <ProtectedRoute>
+                        <Scorecard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/404" element={<NotFound />} />
+                  <Route path="*" element={<Navigate to="/404" replace />} />
+                </Routes>
               </Suspense>
-            } />
-            <Route path="/*" element={
-              <PerformanceProvider>
-                <AppLayout>
-                  <Suspense fallback={<PageSkeleton />}>
-                    <Routes>
-                      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                      <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
-                      <Route path="/videos" element={<ProtectedRoute><Videos /></ProtectedRoute>} />
-                      <Route path="/ads" element={<ProtectedRoute><Ads /></ProtectedRoute>} />
-                      <Route path="/eos" element={<ProtectedRoute><EOS /></ProtectedRoute>} />
-                      <Route path="/eos/issues" element={<ProtectedRoute><EOSIssues /></ProtectedRoute>} />
-                      <Route path="/eos/rocks" element={<ProtectedRoute><EOSRocks /></ProtectedRoute>} />
-                      <Route path="/eos/meetings" element={<ProtectedRoute><EOSMeetings /></ProtectedRoute>} />
-                      <Route path="/eos/scorecard" element={<ProtectedRoute><Scorecard /></ProtectedRoute>} />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </AppLayout>
-              </PerformanceProvider>
-            } />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+            </div>
+          </Router>
+        </AuthProvider>
+        <Toaster />
+        {isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+}
 
 export default App;
