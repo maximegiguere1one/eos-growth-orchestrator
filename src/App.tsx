@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthProvider';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
 import { analytics } from '@/analytics/posthog';
 import { logger } from '@/lib/observability';
@@ -40,7 +41,9 @@ function App() {
                     path="/"
                     element={
                       <ProtectedRoute>
-                        <Dashboard />
+                        <AppLayout>
+                          <Dashboard />
+                        </AppLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -48,7 +51,9 @@ function App() {
                     path="/eos"
                     element={
                       <ProtectedRoute>
-                        <EOS />
+                        <AppLayout>
+                          <EOS />
+                        </AppLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -56,7 +61,9 @@ function App() {
                     path="/eos/issues"
                     element={
                       <ProtectedRoute>
-                        <EOSIssues />
+                        <AppLayout>
+                          <EOSIssues />
+                        </AppLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -64,7 +71,9 @@ function App() {
                     path="/eos/rocks"
                     element={
                       <ProtectedRoute>
-                        <EOSRocks />
+                        <AppLayout>
+                          <EOSRocks />
+                        </AppLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -72,7 +81,9 @@ function App() {
                     path="/eos/meetings"
                     element={
                       <ProtectedRoute>
-                        <EOSMeetings />
+                        <AppLayout>
+                          <EOSMeetings />
+                        </AppLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -80,7 +91,9 @@ function App() {
                     path="/scorecard"
                     element={
                       <ProtectedRoute>
-                        <Scorecard />
+                        <AppLayout>
+                          <Scorecard />
+                        </AppLayout>
                       </ProtectedRoute>
                     }
                   />
