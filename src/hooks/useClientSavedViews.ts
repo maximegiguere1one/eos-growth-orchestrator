@@ -2,39 +2,41 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthProvider';
 
 export interface SavedView {
   id: string;
   name: string;
-  params: {
-    filters?: any;
-    sort?: any;
-    columns?: string[];
-  };
+  params: any;
   is_default: boolean;
   created_at: string;
   updated_at: string;
 }
 
-// For now, we'll use localStorage until the database types are updated
 export const useClientSavedViews = () => {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ['client-saved-views'],
+    queryKey: ['client-saved-views', user?.id],
     queryFn: async (): Promise<SavedView[]> => {
-      // Temporary implementation using localStorage
-      const saved = localStorage.getItem('client-saved-views');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-      return [];
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('client_saved_views' as any)
+        .select('id, name, params, is_default, created_at, updated_at')
+        .order('is_default', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return (data || []) as unknown as SavedView[];
     },
     staleTime: 10 * 60 * 1000,
+    enabled: !!user?.id,
   });
 };
 
 export const useSaveView = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (viewData: {
@@ -42,26 +44,28 @@ export const useSaveView = () => {
       params: any;
       is_default?: boolean;
     }) => {
-      // Temporary implementation using localStorage
-      const saved = localStorage.getItem('client-saved-views');
-      const views: SavedView[] = saved ? JSON.parse(saved) : [];
-      
+      if (!user?.id) throw new Error('Utilisateur non authentifié');
+
       if (viewData.is_default) {
-        views.forEach(view => view.is_default = false);
+        await supabase
+          .from('client_saved_views' as any)
+          .update({ is_default: false })
+          .eq('user_id', user.id);
       }
 
-      const newView: SavedView = {
-        id: crypto.randomUUID(),
-        name: viewData.name,
-        params: viewData.params,
-        is_default: viewData.is_default || false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      const { data, error } = await supabase
+        .from('client_saved_views' as any)
+        .insert({
+          user_id: user.id,
+          name: viewData.name,
+          params: viewData.params,
+          is_default: viewData.is_default || false,
+        })
+        .select('id, name, params, is_default, created_at, updated_at')
+        .single();
 
-      views.push(newView);
-      localStorage.setItem('client-saved-views', JSON.stringify(views));
-      return newView;
+      if (error) throw error;
+      return data as unknown as SavedView;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['client-saved-views'] });
@@ -79,11 +83,11 @@ export const useDeleteSavedView = () => {
 
   return useMutation({
     mutationFn: async (viewId: string) => {
-      // Temporary implementation using localStorage
-      const saved = localStorage.getItem('client-saved-views');
-      const views: SavedView[] = saved ? JSON.parse(saved) : [];
-      const filtered = views.filter(view => view.id !== viewId);
-      localStorage.setItem('client-saved-views', JSON.stringify(filtered));
+      const { error } = await supabase
+        .from('client_saved_views' as any)
+        .delete()
+        .eq('id', viewId);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['client-saved-views'] });
