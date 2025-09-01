@@ -9,9 +9,10 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isInitialized } = useAuth();
 
-  if (isLoading) {
+  // Only show loading if not initialized yet
+  if (!isInitialized) {
     return (
       <div className="space-y-6">
         <div className="space-y-2">
@@ -28,6 +29,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
+  // Once initialized, check for user
   if (!user) {
     return <Navigate to="/auth" replace />;
   }

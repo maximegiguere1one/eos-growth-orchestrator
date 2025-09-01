@@ -56,6 +56,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         setLoading(false);
         if (!isInitialized) {
+          console.log('Auth initialized with user:', session?.user?.email || 'none');
           setInitialized(true);
         }
       }
@@ -67,6 +68,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (mounted) {
           setUser(authUser);
           setLoading(false);
+          console.log('Auth initialized with user:', authUser?.email || 'none');
           setInitialized(true);
         }
       })
@@ -75,6 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (mounted) {
           setUser(null);
           setLoading(false);
+          console.log('Auth initialized with no user');
           setInitialized(true);
         }
       });

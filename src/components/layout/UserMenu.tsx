@@ -7,14 +7,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthProvider';
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
 
   if (!user) return null;
 
-  const initials = user.email?.slice(0, 2).toUpperCase() || 'U';
+  const initials = user?.email?.slice(0, 2).toUpperCase() || 'U';
 
   return (
     <DropdownMenu>
@@ -28,7 +28,7 @@ export function UserMenu() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
-            <p className="font-medium text-sm">{user.email}</p>
+            <p className="font-medium text-sm">{user?.email}</p>
           </div>
         </div>
         <DropdownMenuItem onClick={signOut}>
