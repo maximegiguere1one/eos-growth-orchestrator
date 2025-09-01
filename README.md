@@ -30,8 +30,8 @@ npm run build
 
 | Variable | Description | Required | Example |
 |----------|-------------|----------|---------|
-| `VITE_SUPABASE_URL` | Supabase project URL | ✅ | `https://xxx.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon key | ✅ | `eyJhbGciOiJIUzI1NiIs...` |
+| `VITE_SUPABASE_URL` | Supabase project URL (e.g., `https://xyz.supabase.co` or `http://localhost:54321` for local dev) | ✅ | `https://xyz.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon key (public anon key for the project) | ✅ | `eyJhbGciOiJIUzI1NiIs...` |
 | `VITE_POSTHOG_KEY` | PostHog API key | ✅ | `phc_xxx` |
 | `VITE_POSTHOG_HOST` | PostHog host | ✅ | `https://app.posthog.com` |
 | `VITE_SENTRY_DSN` | Sentry DSN for error tracking | ✅ | `https://xxx@sentry.io/xxx` |
