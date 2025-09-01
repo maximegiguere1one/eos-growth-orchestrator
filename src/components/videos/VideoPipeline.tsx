@@ -9,7 +9,7 @@ export function VideoPipeline() {
   const { data: statusData, isLoading, error, refetch } = useVideosByStatus();
 
   if (isLoading) {
-    return <LoadingSkeleton className="h-48" />;
+    return <LoadingSkeleton variant="grid" count={5} />;
   }
 
   if (error) {

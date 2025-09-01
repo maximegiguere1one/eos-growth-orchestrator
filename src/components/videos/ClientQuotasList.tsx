@@ -11,7 +11,7 @@ export function ClientQuotasList() {
   const { data: quotas, isLoading, error, refetch } = useClientQuotas();
 
   if (isLoading) {
-    return <LoadingSkeleton className="h-64" />;
+    return <LoadingSkeleton variant="card" count={3} />;
   }
 
   if (error) {

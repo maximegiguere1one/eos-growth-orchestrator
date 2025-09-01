@@ -12,7 +12,7 @@ export function RecentVideosList() {
   const { data: videos, isLoading, error, refetch } = useRecentVideos();
 
   if (isLoading) {
-    return <LoadingSkeleton className="h-96" />;
+    return <LoadingSkeleton variant="list" count={5} />;
   }
 
   if (error) {

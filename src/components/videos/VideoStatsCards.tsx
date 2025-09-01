@@ -12,7 +12,7 @@ export function VideoStatsCards() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
-          <LoadingSkeleton key={i} className="h-32" />
+          <LoadingSkeleton key={i} variant="card" count={1} />
         ))}
       </div>
     );
