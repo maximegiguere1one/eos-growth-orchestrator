@@ -34,22 +34,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     let mounted = true;
 
-    // Set up auth state listener
+    // Set up auth state listener (SYNCHRONOUS callback to prevent deadlocks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (!mounted) return;
 
         console.log('Auth state changed:', event, session?.user?.email);
 
+        // Synchronous state updates only
         if (session?.user) {
-          // Get updated user data
-          try {
-            const authUser = await authService.getCurrentUser();
-            setUser(authUser);
-          } catch (error) {
-            console.error('Error getting current user:', error);
-            setUser(null);
-          }
+          setUser(session.user as any); // Temporary direct assignment
+          // Defer Supabase calls to prevent deadlocks
+          setTimeout(async () => {
+            if (!mounted) return;
+            try {
+              const authUser = await authService.getCurrentUser();
+              if (mounted) setUser(authUser);
+            } catch (error) {
+              console.error('Error getting current user:', error);
+              if (mounted) setUser(null);
+            }
+          }, 0);
         } else {
           setUser(null);
         }
@@ -91,7 +96,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      await authService.signIn(email, password);
+      const { performCleanSignIn } = await import('@/lib/authCleanup');
+      await performCleanSignIn(async () => {
+        await authService.signIn(email, password);
+      });
       // User state will be updated by the auth state change listener
     } finally {
       setLoading(false);
@@ -111,7 +119,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOut = async () => {
     setLoading(true);
     try {
-      await authService.signOut();
+      const { performCleanSignOut } = await import('@/lib/authCleanup');
+      await performCleanSignOut();
       clearAuth();
     } finally {
       setLoading(false);
