@@ -1,9 +1,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Target, TrendingUp, TrendingDown, AlertTriangle, Plus } from "lucide-react";
+import { Target, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 import { CreateCampaignDialog } from "@/components/ads/CreateCampaignDialog";
 import { useAdsCampaigns, useCampaignMetrics, useGlobalAdsMetrics } from "@/hooks/useAds";
 import { LoadingSkeleton } from "@/components/common/LoadingSkeleton";
@@ -148,14 +147,6 @@ const Ads = () => {
             <EmptyState
               title="Aucune campagne"
               description="Commencez par créer votre première campagne publicitaire."
-              action={
-                <CreateCampaignDialog>
-                  <Button variant="premium">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Créer ma première campagne
-                  </Button>
-                </CreateCampaignDialog>
-              }
             />
           ) : (
             <div className="space-y-6">

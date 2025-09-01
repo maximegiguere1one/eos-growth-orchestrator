@@ -66,7 +66,9 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
 
   const onSubmit = async (data: CampaignFormData) => {
     const campaignData = {
-      ...data,
+      name: data.name,
+      budget_total: data.budget_total,
+      objective: data.objective || undefined,
       client_id: data.client_id || undefined,
       start_date: data.start_date || undefined,
       end_date: data.end_date || undefined,
@@ -81,7 +83,7 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children || (
-          <Button variant="premium">
+          <Button variant="default">
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle Campagne
           </Button>
