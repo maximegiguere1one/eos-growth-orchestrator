@@ -14,6 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      ads_campaign_stats: {
+        Row: {
+          campaign_id: string
+          clicks: number
+          created_at: string
+          date: string
+          id: string
+          impressions: number
+          leads: number
+          revenue: number
+          spend: number
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          clicks?: number
+          created_at?: string
+          date: string
+          id?: string
+          impressions?: number
+          leads?: number
+          revenue?: number
+          spend?: number
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          clicks?: number
+          created_at?: string
+          date?: string
+          id?: string
+          impressions?: number
+          leads?: number
+          revenue?: number
+          spend?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ads_campaign_stats_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ads_campaign_metrics"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "ads_campaign_stats_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ads_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ads_campaigns: {
+        Row: {
+          archived_at: string | null
+          budget_total: number
+          client_id: string | null
+          created_at: string
+          created_by: string
+          end_date: string | null
+          id: string
+          name: string
+          objective: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["ad_campaign_status"]
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          budget_total?: number
+          client_id?: string | null
+          created_at?: string
+          created_by?: string
+          end_date?: string | null
+          id?: string
+          name: string
+          objective?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["ad_campaign_status"]
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          budget_total?: number
+          client_id?: string | null
+          created_at?: string
+          created_by?: string
+          end_date?: string | null
+          id?: string
+          name?: string
+          objective?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["ad_campaign_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ads_campaigns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -454,7 +561,19 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      ads_campaign_metrics: {
+        Row: {
+          campaign_id: string | null
+          cpc: number | null
+          cpl: number | null
+          roas: number | null
+          total_clicks: number | null
+          total_leads: number | null
+          total_revenue: number | null
+          total_spend: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       ensure_user_bootstrap: {
@@ -478,6 +597,7 @@ export type Database = {
       }
     }
     Enums: {
+      ad_campaign_status: "draft" | "active" | "paused" | "completed"
       app_role: "admin" | "manager" | "user"
       audit_action: "create" | "update" | "archive" | "resolve" | "complete"
       issue_status: "open" | "resolved"
@@ -611,6 +731,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ad_campaign_status: ["draft", "active", "paused", "completed"],
       app_role: ["admin", "manager", "user"],
       audit_action: ["create", "update", "archive", "resolve", "complete"],
       issue_status: ["open", "resolved"],
