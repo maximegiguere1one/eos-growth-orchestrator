@@ -431,6 +431,14 @@ const ClientGrowthDashboard = () => {
             </Card>
           </div>
         </TabsContent>
+
+        <TabsContent value="journey">
+          <ClientJourneyTracker />
+        </TabsContent>
+
+        <TabsContent value="automation">
+          <AutomationWorkflows />
+        </TabsContent>
       </Tabs>
 
       {/* Actions Rapides */}
@@ -475,15 +483,6 @@ const ClientGrowthDashboard = () => {
           </div>
         </CardContent>
       </Card>
-
-        <TabsContent value="journey">
-          <ClientJourneyTracker />
-        </TabsContent>
-
-        <TabsContent value="automation">
-          <AutomationWorkflows />
-        </TabsContent>
-      </Tabs>
 
       {/* Section Outils Avancés */}
       <Card className="mt-8">
