@@ -34,7 +34,7 @@ function validateEnvironment(): EnvironmentConfig {
     APP_VERSION: import.meta.env.VITE_APP_VERSION || '1.0.0',
     
     SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     
     // Optional variables with defaults
     POSTHOG_KEY: import.meta.env.VITE_POSTHOG_KEY,

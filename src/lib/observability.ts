@@ -26,8 +26,8 @@ class Logger {
       level,
       message,
       sessionId: this.sessionId,
-      environment: env.VITE_APP_ENV,
-      version: env.VITE_APP_VERSION,
+      environment: env.APP_ENV,
+      version: env.APP_VERSION,
       ...this.context,
       ...(data && { data }),
     };

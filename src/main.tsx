@@ -1,3 +1,4 @@
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
@@ -24,8 +25,8 @@ if (env.ENABLE_ERROR_TRACKING && env.SENTRY_DSN) {
       beforeSend: (event) => {
         // Filter sensitive data from Sentry reports
         if (event.request?.url?.includes('auth')) {
-          delete event.request.data;
-          delete event.request.headers;
+          delete (event as any).request.data;
+          delete (event as any).request.headers;
         }
         return event;
       },
@@ -50,12 +51,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
-      suspense: false,
-      useErrorBoundary: false,
       refetchOnWindowFocus: false,
     },
     mutations: {
-      useErrorBoundary: false,
+      // Intentionally empty; configure per-mutation as needed
     },
   },
   
@@ -65,11 +64,6 @@ const queryClient = new QueryClient({
   // global error handler
   // onError: (error) => {
   //   console.error("global error handler", error)
-  //   // toast({
-  //   //   title: "global error handler",
-  //   //   description: error.message,
-  //   //   variant: "destructive",
-  //   // });
   // },
 });
 

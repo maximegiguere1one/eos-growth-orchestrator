@@ -6,12 +6,12 @@ class AnalyticsService {
   private initialized = false;
 
   init() {
-    if (this.initialized || !env.VITE_POSTHOG_KEY || isDevelopment) {
+    if (this.initialized || !env.POSTHOG_KEY || isDevelopment) {
       return;
     }
 
-    posthog.init(env.VITE_POSTHOG_KEY, {
-      api_host: env.VITE_POSTHOG_HOST || 'https://app.posthog.com',
+    posthog.init(env.POSTHOG_KEY, {
+      api_host: env.POSTHOG_HOST || 'https://app.posthog.com',
       autocapture: true,
       capture_pageview: true,
       disable_session_recording: false,

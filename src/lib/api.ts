@@ -1,10 +1,16 @@
-
 import { logger } from './observability';
 import { validateData, ValidationSchema } from './validation';
 
 // API configuration
 const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '30000');
 const MAX_RETRIES = parseInt(import.meta.env.VITE_API_RETRY_ATTEMPTS || '3');
+
+// Define a generic options type so validateResponse tracks T
+type RequestOptions<T> = RequestInit & {
+  timeout?: number;
+  retries?: number;
+  validateResponse?: ValidationSchema<T>;
+};
 
 // Enhanced fetch with retry, timeout, and validation
 export class ApiClient {
@@ -170,37 +176,37 @@ export class ApiClient {
     return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // Convenience methods
-  async get<T>(endpoint: string, options: Omit<Parameters<typeof this.request>[1], 'method'> = {}) {
-    return this.request<T>(endpoint, { ...options, method: 'GET' });
+  // Convenience methods with correctly typed options
+  async get<T>(endpoint: string, options: Omit<RequestOptions<T>, 'method'> = {}) {
+    return this.request<T>(endpoint, { ...(options as RequestOptions<T>), method: 'GET' });
   }
 
-  async post<T>(endpoint: string, data?: any, options: Omit<Parameters<typeof this.request>[1], 'method' | 'body'> = {}) {
+  async post<T>(endpoint: string, data?: any, options: Omit<RequestOptions<T>, 'method' | 'body'> = {}) {
     return this.request<T>(endpoint, {
-      ...options,
+      ...(options as RequestOptions<T>),
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async put<T>(endpoint: string, data?: any, options: Omit<Parameters<typeof this.request>[1], 'method' | 'body'> = {}) {
+  async put<T>(endpoint: string, data?: any, options: Omit<RequestOptions<T>, 'method' | 'body'> = {}) {
     return this.request<T>(endpoint, {
-      ...options,
+      ...(options as RequestOptions<T>),
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async patch<T>(endpoint: string, data?: any, options: Omit<Parameters<typeof this.request>[1], 'method' | 'body'> = {}) {
+  async patch<T>(endpoint: string, data?: any, options: Omit<RequestOptions<T>, 'method' | 'body'> = {}) {
     return this.request<T>(endpoint, {
-      ...options,
+      ...(options as RequestOptions<T>),
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async delete<T>(endpoint: string, options: Omit<Parameters<typeof this.request>[1], 'method'> = {}) {
-    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+  async delete<T>(endpoint: string, options: Omit<RequestOptions<T>, 'method'> = {}) {
+    return this.request<T>(endpoint, { ...(options as RequestOptions<T>), method: 'DELETE' });
   }
 }
 
