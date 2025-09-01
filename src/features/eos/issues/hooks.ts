@@ -26,20 +26,33 @@ export function useEOSIssues() {
 
   // Real-time subscription
   useEffect(() => {
-    const channel = supabase
-      .channel('eos_issues_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'eos_issues'
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: issuesQueryKeys.all });
-        }
-      )
-      .subscribe();
+      const channel = supabase
+        .channel('eos_issues_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'eos_issues'
+          },
+          (payload) => {
+            // Optimistic cache updates instead of full invalidation
+            if (payload.eventType === 'INSERT') {
+              queryClient.setQueryData<EOSIssue[]>(issuesQueryKeys.lists(), (old) => 
+                old ? [payload.new as EOSIssue, ...old] : [payload.new as EOSIssue]
+              );
+            } else if (payload.eventType === 'UPDATE') {
+              queryClient.setQueryData<EOSIssue[]>(issuesQueryKeys.lists(), (old) => 
+                old ? old.map(item => item.id === payload.new.id ? payload.new as EOSIssue : item) : []
+              );
+            } else if (payload.eventType === 'DELETE') {
+              queryClient.setQueryData<EOSIssue[]>(issuesQueryKeys.lists(), (old) => 
+                old ? old.filter(item => item.id !== payload.old.id) : []
+              );
+            }
+          }
+        )
+        .subscribe();
 
     return () => {
       supabase.removeChannel(channel);

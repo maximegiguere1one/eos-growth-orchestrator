@@ -26,20 +26,33 @@ export function useEOSTodos() {
 
   // Real-time subscription
   useEffect(() => {
-    const channel = supabase
-      .channel('eos_todos_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'eos_todos'
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: todosQueryKeys.all });
-        }
-      )
-      .subscribe();
+      const channel = supabase
+        .channel('eos_todos_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'eos_todos'
+          },
+          (payload) => {
+            // Optimistic cache updates instead of full invalidation
+            if (payload.eventType === 'INSERT') {
+              queryClient.setQueryData<EOSTodo[]>(todosQueryKeys.lists(), (old) => 
+                old ? [payload.new as EOSTodo, ...old] : [payload.new as EOSTodo]
+              );
+            } else if (payload.eventType === 'UPDATE') {
+              queryClient.setQueryData<EOSTodo[]>(todosQueryKeys.lists(), (old) => 
+                old ? old.map(item => item.id === payload.new.id ? payload.new as EOSTodo : item) : []
+              );
+            } else if (payload.eventType === 'DELETE') {
+              queryClient.setQueryData<EOSTodo[]>(todosQueryKeys.lists(), (old) => 
+                old ? old.filter(item => item.id !== payload.old.id) : []
+              );
+            }
+          }
+        )
+        .subscribe();
 
     return () => {
       supabase.removeChannel(channel);

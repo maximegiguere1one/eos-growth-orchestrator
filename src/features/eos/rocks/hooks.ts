@@ -25,20 +25,33 @@ export function useEOSRocks() {
 
   // Real-time subscription
   useEffect(() => {
-    const channel = supabase
-      .channel('eos_rocks_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'eos_rocks'
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: rocksQueryKeys.all });
-        }
-      )
-      .subscribe();
+      const channel = supabase
+        .channel('eos_rocks_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'eos_rocks'
+          },
+          (payload) => {
+            // Optimistic cache updates instead of full invalidation
+            if (payload.eventType === 'INSERT') {
+              queryClient.setQueryData<EOSRock[]>(rocksQueryKeys.lists(), (old) => 
+                old ? [payload.new as EOSRock, ...old] : [payload.new as EOSRock]
+              );
+            } else if (payload.eventType === 'UPDATE') {
+              queryClient.setQueryData<EOSRock[]>(rocksQueryKeys.lists(), (old) => 
+                old ? old.map(item => item.id === payload.new.id ? payload.new as EOSRock : item) : []
+              );
+            } else if (payload.eventType === 'DELETE') {
+              queryClient.setQueryData<EOSRock[]>(rocksQueryKeys.lists(), (old) => 
+                old ? old.filter(item => item.id !== payload.old.id) : []
+              );
+            }
+          }
+        )
+        .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
