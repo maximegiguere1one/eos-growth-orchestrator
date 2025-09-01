@@ -125,15 +125,24 @@ export const useVideosByStatus = () => {
   });
 };
 
-// Mutation pour créer une nouvelle vidéo
 export const useCreateVideo = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (video: Omit<Video, 'id' | 'created_at' | 'updated_at' | 'created_by'>) => {
+    mutationFn: async (videoData: { 
+      title: string; 
+      client_id: string; 
+      due_date?: string;
+      status?: string;
+    }) => {
       const { data, error } = await supabase
         .from('videos')
-        .insert(video)
+        .insert({
+          title: videoData.title,
+          client_id: videoData.client_id,
+          due_date: videoData.due_date || null,
+          status: (videoData.status as any) || 'idea',
+        })
         .select()
         .single();
       
@@ -144,15 +153,6 @@ export const useCreateVideo = () => {
       queryClient.invalidateQueries({ queryKey: ['video-stats'] });
       queryClient.invalidateQueries({ queryKey: ['recent-videos'] });
       queryClient.invalidateQueries({ queryKey: ['videos-by-status'] });
-      toast({ title: "Vidéo créée avec succès" });
     },
-    onError: (error) => {
-      console.error('Create video error:', error);
-      toast({ 
-        title: "Erreur lors de la création", 
-        description: "Impossible de créer la vidéo",
-        variant: "destructive" 
-      });
-    }
   });
 };

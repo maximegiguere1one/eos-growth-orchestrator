@@ -5,13 +5,9 @@ import { VideoStatsCards } from "@/components/videos/VideoStatsCards";
 import { VideoPipeline } from "@/components/videos/VideoPipeline";
 import { RecentVideosList } from "@/components/videos/RecentVideosList";
 import { ClientQuotasList } from "@/components/videos/ClientQuotasList";
+import { CreateVideoDialog } from "@/components/videos/CreateVideoDialog";
 
 const Videos = () => {
-  const handleNewVideo = () => {
-    // TODO: Implémenter l'ouverture du dialog de création de vidéo
-    console.log("Nouvelle vidéo");
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -20,10 +16,12 @@ const Videos = () => {
           <h1 className="text-3xl font-bold text-foreground">Production Vidéos</h1>
           <p className="text-muted-foreground">Suivi de la production vidéo en temps réel</p>
         </div>
-        <Button variant="premium" onClick={handleNewVideo}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle Vidéo
-        </Button>
+        <CreateVideoDialog>
+          <Button variant="premium">
+            <Plus className="h-4 w-4 mr-2" />
+            Nouvelle Vidéo
+          </Button>
+        </CreateVideoDialog>
       </div>
 
       {/* Global Stats */}
