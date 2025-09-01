@@ -1,5 +1,8 @@
 import { createContext, useContext, ReactNode, useMemo } from 'react';
-import { useEOSIssues, useEOSRocks, useEOSTodos, useEOSKPIs } from '@/hooks/useEOS';
+import { useEOSIssues } from '@/features/eos/issues/hooks';
+import { useEOSRocks } from '@/features/eos/rocks/hooks';
+import { useEOSKPIs } from '@/features/eos/kpis/hooks';
+import { useEOSTodos } from '@/hooks/useEOS';
 
 interface PerformanceContextType {
   issuesCount: number;

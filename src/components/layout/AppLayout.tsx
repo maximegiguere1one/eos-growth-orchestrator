@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { UserMenu } from "@/components/layout/UserMenu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -31,6 +32,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <Button variant="outline" className="hidden md:flex">
                 Rapport Hebdo
               </Button>
+              <UserMenu />
             </div>
           </header>
 

@@ -15,7 +15,8 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEOSKPIs, useCreateKPI, useUpdateKPI, useKPIValuesForWeek, useUpsertKPIValue, useKPITrends } from "@/hooks/useEOS";
+import { useEOSKPIs, useCreateKPI, useUpdateKPI, useKPIValuesForWeek, useUpsertKPIValue, useKPITrends } from "@/features/eos/kpis/hooks";
+import { KPI_DIRECTION_OPTIONS } from "@/features/eos/kpis/types";
 import { cn } from "@/lib/utils";
 import { format, startOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -184,7 +185,16 @@ export default function Scorecard() {
   const onSubmit = useCallback(async (data: KPIFormData) => {
     try {
       if (editingKPI) {
-        await updateKPI.mutateAsync({ id: editingKPI.id, ...data });
+        await updateKPI.mutateAsync({ 
+          id: editingKPI.id, 
+          updates: {
+            name: data.name,
+            unit: data.unit || null,
+            target: data.target || null,
+            direction: data.direction,
+            position: data.position,
+          }
+        });
         setEditingKPI(null);
       } else {
         await createKPI.mutateAsync({ 
@@ -219,8 +229,10 @@ export default function Scorecard() {
     try {
       await updateKPI.mutateAsync({
         id: kpi.id,
-        archived_at: new Date().toISOString(),
-        is_active: false,
+        updates: {
+          archived_at: new Date().toISOString(),
+          is_active: false,
+        }
       });
     } catch (error) {
       console.error('Error archiving KPI:', error);

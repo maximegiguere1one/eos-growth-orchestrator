@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Target, Plus, CheckCircle, AlertTriangle, Calendar } from "lucide-react";
-import { useEOSRocks, useCreateRock, useUpdateRock, EOSRock } from "@/hooks/useEOS";
+import { useEOSRocks, useCreateRock, useUpdateRock } from "@/features/eos/rocks/hooks";
+import { EOSRock, ROCK_STATUS_OPTIONS } from "@/features/eos/rocks/types";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Section } from "@/components/common/Section";
@@ -48,7 +49,7 @@ export default function EOSRocks() {
   }, [createRock, newRock]);
 
   const handleUpdateProgress = useCallback((rockId: string, progress: number, status?: string) => {
-    const updates: any = { id: rockId, progress };
+    const updates: any = { progress };
     
     if (status) {
       updates.status = status;
@@ -66,7 +67,7 @@ export default function EOSRocks() {
       }
     }
     
-    updateRock.mutate(updates);
+    updateRock.mutate({ id: rockId, updates });
   }, [updateRock]);
 
   const getStatusColor = useCallback((status: string) => {

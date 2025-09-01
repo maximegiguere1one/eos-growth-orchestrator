@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { CheckSquare, Plus, Archive, AlertTriangle, Check } from "lucide-react";
-import { useEOSIssues, useCreateIssue, useUpdateIssue, EOSIssue } from "@/hooks/useEOS";
+import { useEOSIssues, useCreateIssue, useUpdateIssue } from "@/features/eos/issues/hooks";
+import { EOSIssue, ISSUE_STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/features/eos/issues/types";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Section } from "@/components/common/Section";
@@ -128,15 +129,19 @@ export default function EOSIssues() {
   const handleResolveIssue = useCallback((issueId: string) => {
     updateIssue.mutate({
       id: issueId,
-      status: 'resolved',
-      resolved_at: new Date().toISOString()
+      updates: {
+        status: 'resolved',
+        resolved_at: new Date().toISOString()
+      }
     });
   }, [updateIssue]);
 
   const handleArchiveIssue = useCallback((issueId: string) => {
     updateIssue.mutate({
       id: issueId,
-      archived_at: new Date().toISOString()
+      updates: {
+        archived_at: new Date().toISOString()
+      }
     });
   }, [updateIssue]);
 
