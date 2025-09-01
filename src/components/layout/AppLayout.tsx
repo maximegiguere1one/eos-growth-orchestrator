@@ -45,7 +45,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           </Button>
 
           {/* Main Content */}
-          <main className="flex-1 p-6">
+          <main id="main-content" className="flex-1 p-6">
             {children}
           </main>
         </div>

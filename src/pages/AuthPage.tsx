@@ -1,22 +1,25 @@
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthForm } from '@/components/auth/AuthForm';
 import { useAuth } from '@/contexts/AuthProvider';
-import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
+import { PageLoader } from '@/components/common/PageLoader';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { user, isLoading, isInitialized } = useAuth();
+  const location = useLocation();
+  const { user, isInitialized } = useAuth();
 
   useEffect(() => {
     if (isInitialized && user) {
-      navigate('/', { replace: true });
+      // Redirect to intended location or default to dashboard
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     }
-  }, [user, isInitialized, navigate]);
+  }, [user, isInitialized, navigate, location.state]);
 
-  if (!isInitialized || isLoading) {
-    return <LoadingSkeleton />;
+  if (!isInitialized) {
+    return <PageLoader variant="minimal" />;
   }
 
   return (

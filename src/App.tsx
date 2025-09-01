@@ -3,9 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthProvider';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ProtectedLayout } from '@/components/layout/ProtectedLayout';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { AppLayout } from '@/components/layout/AppLayout';
+import { SkipToContent } from '@/components/common/SkipToContent';
+import { PageLoader } from '@/components/common/PageLoader';
 
 import { analytics } from '@/analytics/posthog';
 import { logger } from '@/lib/observability';
@@ -24,6 +25,9 @@ const EOSIssues = lazy(() => import('@/pages/EOSIssues'));
 const EOSRocks = lazy(() => import('@/pages/EOSRocks'));
 const EOSMeetings = lazy(() => import('@/pages/EOSMeetings'));
 const Scorecard = lazy(() => import('@/pages/Scorecard'));
+const Clients = lazy(() => import('@/pages/Clients'));
+const Ads = lazy(() => import('@/pages/Ads'));
+const Videos = lazy(() => import('@/pages/Videos'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 function App() {
@@ -32,69 +36,19 @@ function App() {
       <AuthProvider>
         <Router>
           <div className="min-h-screen bg-background">
-            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-pulse">Loading...</div></div>}>
+            <SkipToContent />
+            <Suspense fallback={<PageLoader variant="minimal" />}>
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Dashboard />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/eos"
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <EOS />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/eos/issues"
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <EOSIssues />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/eos/rocks"
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <EOSRocks />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/eos/meetings"
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <EOSMeetings />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/scorecard"
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Scorecard />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
+                <Route path="/" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+                <Route path="/scorecard" element={<ProtectedLayout><Scorecard /></ProtectedLayout>} />
+                <Route path="/eos" element={<ProtectedLayout><EOS /></ProtectedLayout>} />
+                <Route path="/eos/issues" element={<ProtectedLayout><EOSIssues /></ProtectedLayout>} />
+                <Route path="/eos/rocks" element={<ProtectedLayout><EOSRocks /></ProtectedLayout>} />
+                <Route path="/eos/meetings" element={<ProtectedLayout><EOSMeetings /></ProtectedLayout>} />
+                <Route path="/clients" element={<ProtectedLayout><Clients /></ProtectedLayout>} />
+                <Route path="/ads" element={<ProtectedLayout><Ads /></ProtectedLayout>} />
+                <Route path="/videos" element={<ProtectedLayout><Videos /></ProtectedLayout>} />
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
