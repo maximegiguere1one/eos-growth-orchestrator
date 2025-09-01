@@ -51,7 +51,7 @@ const Videos = () => {
           <h1 className="text-3xl font-bold text-foreground">Production Vidéos</h1>
           <p className="text-muted-foreground">Suivi de la production vidéo (12 vidéos/mois/client)</p>
         </div>
-        <Button className="bg-gradient-primary text-primary-foreground">
+        <Button variant="premium">
           <Plus className="h-4 w-4 mr-2" />
           Nouvelle Vidéo
         </Button>
