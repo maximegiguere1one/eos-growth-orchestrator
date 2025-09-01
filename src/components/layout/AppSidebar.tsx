@@ -8,7 +8,11 @@ import {
   Settings,
   BarChart3,
   CheckSquare,
-  Building2
+  Building2,
+  TrendingUp,
+  Rocket,
+  Bot,
+  Map
 } from "lucide-react";
 
 import {
@@ -22,6 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
 
 const navigationItems = [
   {
@@ -35,6 +40,13 @@ const navigationItems = [
     url: "/clients",
     icon: Users,
     description: "Gestion clients"
+  },
+  {
+    title: "Croissance Client",
+    url: "/clients/growth",
+    icon: TrendingUp,
+    description: "Analytics & prévisions",
+    badge: "NEW"
   },
   {
     title: "Vidéos",
@@ -109,6 +121,11 @@ export function AppSidebar() {
                     <NavLink to={item.url} className={getNavClass(item.url)}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
+                      {item.badge && (
+                        <Badge variant="secondary" className="ml-auto text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                          {item.badge}
+                        </Badge>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -132,6 +149,23 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Growth Tools Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Outils Avancés</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink to="/growth-tools" className={getNavClass("/growth-tools")}>
+                    <Rocket className="h-4 w-4" />
+                    <span>Growth Tools</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

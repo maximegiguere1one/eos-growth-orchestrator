@@ -26,6 +26,9 @@ const EOSRocks = lazy(() => import('@/pages/EOSRocks'));
 const EOSMeetings = lazy(() => import('@/pages/EOSMeetings'));
 const Scorecard = lazy(() => import('@/pages/Scorecard'));
 const Clients = lazy(() => import('@/pages/Clients'));
+const ClientsAdvanced = lazy(() => import('@/pages/ClientsAdvanced'));
+const ClientGrowthDashboard = lazy(() => import('@/pages/ClientGrowthDashboard'));
+const AdvancedGrowthTools = lazy(() => import('@/pages/AdvancedGrowthTools'));
 const Ads = lazy(() => import('@/pages/Ads'));
 const Videos = lazy(() => import('@/pages/Videos'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
@@ -47,6 +50,9 @@ function App() {
                 <Route path="/eos/rocks" element={<ProtectedLayout><EOSRocks /></ProtectedLayout>} />
                 <Route path="/eos/meetings" element={<ProtectedLayout><EOSMeetings /></ProtectedLayout>} />
                 <Route path="/clients" element={<ProtectedLayout><Clients /></ProtectedLayout>} />
+                <Route path="/clients/advanced" element={<ProtectedLayout><ClientsAdvanced /></ProtectedLayout>} />
+                <Route path="/clients/growth" element={<ProtectedLayout><ClientGrowthDashboard /></ProtectedLayout>} />
+                <Route path="/growth-tools" element={<ProtectedLayout><AdvancedGrowthTools /></ProtectedLayout>} />
                 <Route path="/ads" element={<ProtectedLayout><Ads /></ProtectedLayout>} />
                 <Route path="/videos" element={<ProtectedLayout><Videos /></ProtectedLayout>} />
                 <Route path="/404" element={<NotFound />} />
