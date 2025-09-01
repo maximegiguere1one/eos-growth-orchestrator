@@ -44,6 +44,39 @@ export type Database = {
         }
         Relationships: []
       }
+      clients: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          monthly_quota: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          monthly_quota?: number
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          monthly_quota?: number
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       eos_issues: {
         Row: {
           archived_at: string | null
@@ -369,6 +402,56 @@ export type Database = {
         }
         Relationships: []
       }
+      videos: {
+        Row: {
+          archived_at: string | null
+          client_id: string
+          created_at: string
+          created_by: string
+          due_date: string | null
+          id: string
+          performance: Json | null
+          published_at: string | null
+          status: Database["public"]["Enums"]["video_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          client_id: string
+          created_at?: string
+          created_by?: string
+          due_date?: string | null
+          id?: string
+          performance?: Json | null
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["video_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          due_date?: string | null
+          id?: string
+          performance?: Json | null
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["video_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -400,6 +483,7 @@ export type Database = {
       issue_status: "open" | "resolved"
       meeting_status: "planned" | "in_progress" | "ended"
       rock_status: "not_started" | "on_track" | "at_risk" | "completed"
+      video_status: "idea" | "script" | "shoot" | "edit" | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -532,6 +616,7 @@ export const Constants = {
       issue_status: ["open", "resolved"],
       meeting_status: ["planned", "in_progress", "ended"],
       rock_status: ["not_started", "on_track", "at_risk", "completed"],
+      video_status: ["idea", "script", "shoot", "edit", "published"],
     },
   },
 } as const
