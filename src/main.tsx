@@ -9,7 +9,13 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 // Import production configurations
 import { env, checkConfiguration } from '@/config/environment'
 import { setDevelopmentCSP } from '../infrastructure/csp.config'
-import '../infrastructure/opentelemetry.config'
+
+// Lazy load OpenTelemetry to prevent blocking app startup
+if (env.ENABLE_TRACING || env.APP_ENV === 'production') {
+  import('../infrastructure/opentelemetry.config').catch((e) =>
+    console.warn('Tracing init failed (lazy):', e)
+  );
+}
 
 // Initialize Sentry for error tracking
 if (env.ENABLE_ERROR_TRACKING && env.SENTRY_DSN) {
