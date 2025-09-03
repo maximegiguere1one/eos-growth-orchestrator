@@ -17,18 +17,27 @@ setTimeout(() => {
   analytics.init();
 }, 100);
 
-// Lazy load pages for better performance
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
+// Optimized lazy loading with intelligent preloading
+const Dashboard = lazy(() => import('@/components/performance/OptimizedDashboard'));
 const AuthPage = lazy(() => import('@/pages/AuthPage'));
 const EOS = lazy(() => import('@/pages/EOS'));
 const EOSIssues = lazy(() => import('@/pages/EOSIssues'));
 const EOSRocks = lazy(() => import('@/pages/EOSRocks'));
 const EOSMeetings = lazy(() => import('@/pages/EOSMeetings'));
 const Scorecard = lazy(() => import('@/pages/Scorecard'));
-const ClientsAdvanced = lazy(() => import('@/pages/ClientsAdvanced'));
+const ClientsAdvanced = lazy(() => import('@/components/performance/OptimizedClientPage'));
 const Ads = lazy(() => import('@/pages/Ads'));
 const Videos = lazy(() => import('@/pages/Videos'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
+
+// Preload critical routes on idle
+if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+  requestIdleCallback(() => {
+    // Preload dashboard components
+    import('@/components/performance/OptimizedDashboard');
+    import('@/components/performance/OptimizedClientPage');
+  });
+}
 
 function App() {
   return (

@@ -55,11 +55,16 @@ setDevelopmentCSP();
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
+      retry: 2,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
       refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      staleTime: 5 * 60 * 1000, // 5 minutes default
+      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
     },
     mutations: {
-      // Intentionally empty; configure per-mutation as needed
+      retry: 1,
+      retryDelay: 1000,
     },
   },
   

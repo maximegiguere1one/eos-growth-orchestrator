@@ -4,14 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Users, Video, Target, Calendar, Plus, Building2 } from "lucide-react";
-import { useEOSSummary } from "@/hooks/useEOSSummary";
+import { useEOSSummaryOptimized } from "@/hooks/useEOSOptimized";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect } from "react";
 
 export function DashboardSections() {
   const navigate = useNavigate();
-  const { data: summary, isLoading } = useEOSSummary();
+  const { data: summary, isLoading } = useEOSSummaryOptimized();
 
   // Prefetch EOS page on idle for better navigation performance
   useEffect(() => {
