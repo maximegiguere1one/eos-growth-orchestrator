@@ -28,6 +28,7 @@ const Scorecard = lazy(() => import('@/pages/Scorecard'));
 const ClientsAdvanced = lazy(() => import('@/components/performance/OptimizedClientPage'));
 const Ads = lazy(() => import('@/pages/Ads'));
 const Videos = lazy(() => import('@/pages/Videos'));
+const GrowthCenter = lazy(() => import('@/pages/GrowthCenter'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Preload critical routes on idle
@@ -58,6 +59,7 @@ function App() {
                 <Route path="/clients" element={<ProtectedLayout><ClientsAdvanced /></ProtectedLayout>} />
                 <Route path="/ads" element={<ProtectedLayout><Ads /></ProtectedLayout>} />
                 <Route path="/videos" element={<ProtectedLayout><Videos /></ProtectedLayout>} />
+                <Route path="/growth" element={<ProtectedLayout><GrowthCenter /></ProtectedLayout>} />
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
