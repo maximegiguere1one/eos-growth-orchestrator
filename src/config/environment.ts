@@ -33,7 +33,7 @@ function validateEnvironment(): EnvironmentConfig {
     // Required variables
     APP_ENV: import.meta.env.VITE_APP_ENV as EnvironmentConfig['APP_ENV'] || 'development',
     APP_NAME: import.meta.env.VITE_APP_NAME || 'EOS Management',
-    APP_VERSION: import.meta.env.VITE_APP_VERSION || '1.0.2',
+    APP_VERSION: import.meta.env.VITE_APP_VERSION || '1.0.3',
     
     SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
     SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthProvider';
 import { Loader2 } from 'lucide-react';
 
 const Auth = () => {
@@ -39,23 +39,20 @@ const Auth = () => {
     }
 
     try {
-      const { error } = isSignUp 
-        ? await signUp(email, password)
-        : await signIn(email, password);
-
-      if (error) {
-        if (error.message.includes('already registered')) {
-          setError('An account with this email already exists. Try signing in instead.');
-        } else if (error.message.includes('Invalid login credentials')) {
-          setError('Invalid email or password. Please check your credentials.');
-        } else {
-          setError(error.message);
-        }
-      } else if (isSignUp) {
+      if (isSignUp) {
+        await signUp(email, password);
         setMessage('Check your email for confirmation link!');
+      } else {
+        await signIn(email, password);
       }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+    } catch (err: any) {
+      if (err?.message?.includes('already registered')) {
+        setError('An account with this email already exists. Try signing in instead.');
+      } else if (err?.message?.includes('Invalid login credentials')) {
+        setError('Invalid email or password. Please check your credentials.');
+      } else {
+        setError(err?.message || 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

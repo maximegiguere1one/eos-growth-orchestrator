@@ -38,7 +38,7 @@ export function EmptyState({
       </p>
       
       {action && (
-        <Button onClick={action.onClick} className="bg-gradient-primary">
+        <Button onClick={action.onClick} variant="premium">
           {action.label}
         </Button>
       )}

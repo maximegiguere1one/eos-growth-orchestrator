@@ -4,6 +4,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { SidebarProvider } from '@/components/ui/sidebar'
 
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   const queryClient = new QueryClient({
@@ -17,9 +18,11 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <BrowserRouter>
-          {children}
-        </BrowserRouter>
+        <SidebarProvider>
+          <BrowserRouter>
+            {children}
+          </BrowserRouter>
+        </SidebarProvider>
       </TooltipProvider>
     </QueryClientProvider>
   )

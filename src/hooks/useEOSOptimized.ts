@@ -1,7 +1,161 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { EOSIssue, EOSRock, EOSTodo, EOSKPI } from './useEOS';
+import { useEffect, useCallback, useMemo } from 'react';
+import { EOSIssue, EOSRock, EOSTodo, EOSKPI, EOSMeeting } from './useEOS';
+
+// Optimized query options to prevent recreating objects
+const createQueryOptions = (staleTime: number = 5 * 60 * 1000) => ({
+  staleTime,
+  gcTime: staleTime * 2,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: true,
+});
+
+// Optimized Issues Hook with extended caching and debounced subscriptions
+export const useEOSIssuesOptimized = () => {
+  const queryClient = useQueryClient();
+  
+  const queryOptions = useMemo(
+    () => createQueryOptions(10 * 60 * 1000), // 10 minutes cache
+    []
+  );
+  
+  const query = useQuery({
+    queryKey: ['eos-issues-optimized'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('eos_issues')
+        .select('id, title, description, assigned_to, status, priority, resolved_at, archived_at, created_at, updated_at')
+        .is('archived_at', null)
+        .order('priority', { ascending: false })
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as EOSIssue[];
+    },
+    ...queryOptions,
+  });
+
+  // Debounced subscription to prevent excessive updates
+  const setupSubscription = useCallback(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    const channel = supabase
+      .channel('eos-issues-optimized')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'eos_issues'
+        },
+        () => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['eos-issues-optimized'] });
+          }, 500); // 500ms debounce
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearTimeout(timeoutId);
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  useEffect(setupSubscription, [setupSubscription]);
+
+  return query;
+};
+
+// Optimized Rocks Hook with better caching
+export const useEOSRocksOptimized = () => {
+  const queryClient = useQueryClient();
+  
+  const queryOptions = useMemo(
+    () => createQueryOptions(15 * 60 * 1000), // 15 minutes cache
+    []
+  );
+  
+  const query = useQuery({
+    queryKey: ['eos-rocks-optimized'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('eos_rocks')
+        .select('id, title, description, owner_id, start_date, due_date, progress, status, completed_at, archived_at, created_at, updated_at')
+        .is('archived_at', null)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as EOSRock[];
+    },
+    ...queryOptions,
+  });
+
+  const setupSubscription = useCallback(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    const channel = supabase
+      .channel('eos-rocks-optimized')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'eos_rocks'
+        },
+        () => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['eos-rocks-optimized'] });
+          }, 500);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearTimeout(timeoutId);
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  useEffect(setupSubscription, [setupSubscription]);
+
+  return query;
+};
+
+// Optimized Summary Hook with memoized calculations
+export const useEOSSummaryOptimized = () => {
+  const issuesQuery = useEOSIssuesOptimized();
+  const rocksQuery = useEOSRocksOptimized();
+
+  return useMemo(() => {
+    const isLoading = issuesQuery.isLoading || rocksQuery.isLoading;
+    const error = issuesQuery.error || rocksQuery.error;
+
+    if (isLoading || error) {
+      return { isLoading, error, data: null };
+    }
+
+    const issues = issuesQuery.data || [];
+    const rocks = rocksQuery.data || [];
+
+    return {
+      isLoading: false,
+      error: null,
+      data: {
+        activeIssuesCount: issues.filter(i => i.status === 'open').length,
+        rocksCount: rocks.length,
+        completedRocksCount: rocks.filter(r => r.status === 'completed').length,
+        atRiskRocksCount: rocks.filter(r => r.status === 'at_risk').length,
+        onTrackRocksCount: rocks.filter(r => r.status === 'on_track').length,
+        highPriorityIssuesCount: issues.filter(i => i.priority >= 8).length,
+      }
+    };
+  }, [issuesQuery.data, rocksQuery.data, issuesQuery.isLoading, rocksQuery.isLoading, issuesQuery.error, rocksQuery.error]);
+};
 
 // Optimized mutations that update only relevant queries
 export const useOptimizedCreateIssue = () => {

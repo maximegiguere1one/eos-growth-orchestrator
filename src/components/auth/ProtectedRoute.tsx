@@ -1,37 +1,26 @@
 
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthProvider';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageLoader } from '@/components/common/PageLoader';
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, isLoading, isInitialized } = useAuth();
+  const { user, isInitialized } = useAuth();
+  const location = useLocation();
 
   // Only show loading if not initialized yet
   if (!isInitialized) {
-    return (
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-4 w-96" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-32" />
-          ))}
-        </div>
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
+    return <PageLoader variant="full" />;
   }
 
   // Once initialized, check for user
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    // Save the attempted location for redirect after login
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
