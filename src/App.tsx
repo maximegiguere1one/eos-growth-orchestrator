@@ -1,98 +1,73 @@
-
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthProvider';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ProtectedLayout } from '@/components/layout/ProtectedLayout';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
+import { SkipToContent } from '@/components/common/SkipToContent';
+import { PageLoader } from '@/components/common/PageLoader';
+
 import { analytics } from '@/analytics/posthog';
 import { logger } from '@/lib/observability';
-import { isDevelopment } from '@/config/environment';
+
 
 // Defer analytics initialization to not block startup
 setTimeout(() => {
   analytics.init();
 }, 100);
 
-// Lazy load pages for better performance
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
+// Optimized lazy loading with intelligent preloading
+const Dashboard = lazy(() => import('@/components/performance/OptimizedDashboard'));
 const AuthPage = lazy(() => import('@/pages/AuthPage'));
 const EOS = lazy(() => import('@/pages/EOS'));
 const EOSIssues = lazy(() => import('@/pages/EOSIssues'));
 const EOSRocks = lazy(() => import('@/pages/EOSRocks'));
 const EOSMeetings = lazy(() => import('@/pages/EOSMeetings'));
 const Scorecard = lazy(() => import('@/pages/Scorecard'));
+const ClientsAdvanced = lazy(() => import('@/components/performance/OptimizedClientPage'));
+const Ads = lazy(() => import('@/pages/Ads'));
+const Videos = lazy(() => import('@/pages/Videos'));
+const GrowthCenter = lazy(() => import('@/pages/GrowthCenter'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
+// Preload critical routes on idle
+if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+  requestIdleCallback(() => {
+    // Preload dashboard components
+    import('@/components/performance/OptimizedDashboard');
+    import('@/components/performance/OptimizedClientPage');
+  });
+}
 
 function App() {
   return (
     <ErrorBoundary>
-        <AuthProvider>
-          <Router>
-            <div className="min-h-screen bg-background">
-              <Suspense fallback={<LoadingSkeleton />}>
-                <Routes>
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/eos"
-                    element={
-                      <ProtectedRoute>
-                        <EOS />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/eos/issues"
-                    element={
-                      <ProtectedRoute>
-                        <EOSIssues />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/eos/rocks"
-                    element={
-                      <ProtectedRoute>
-                        <EOSRocks />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/eos/meetings"
-                    element={
-                      <ProtectedRoute>
-                        <EOSMeetings />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/scorecard"
-                    element={
-                      <ProtectedRoute>
-                        <Scorecard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/404" element={<NotFound />} />
-                  <Route path="*" element={<Navigate to="/404" replace />} />
-                </Routes>
-              </Suspense>
-            </div>
-          </Router>
-        </AuthProvider>
-        <Toaster />
-        {isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-background">
+            <SkipToContent />
+            <Suspense fallback={<PageLoader variant="minimal" />}>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+                <Route path="/scorecard" element={<ProtectedLayout><Scorecard /></ProtectedLayout>} />
+                <Route path="/eos" element={<ProtectedLayout><EOS /></ProtectedLayout>} />
+                <Route path="/eos/issues" element={<ProtectedLayout><EOSIssues /></ProtectedLayout>} />
+                <Route path="/eos/rocks" element={<ProtectedLayout><EOSRocks /></ProtectedLayout>} />
+                <Route path="/eos/meetings" element={<ProtectedLayout><EOSMeetings /></ProtectedLayout>} />
+                <Route path="/clients" element={<ProtectedLayout><ClientsAdvanced /></ProtectedLayout>} />
+                <Route path="/ads" element={<ProtectedLayout><Ads /></ProtectedLayout>} />
+                <Route path="/videos" element={<ProtectedLayout><Videos /></ProtectedLayout>} />
+                <Route path="/growth" element={<ProtectedLayout><GrowthCenter /></ProtectedLayout>} />
+                <Route path="/404" element={<NotFound />} />
+                <Route path="*" element={<Navigate to="/404" replace />} />
+              </Routes>
+            </Suspense>
+          </div>
+        </Router>
+      </AuthProvider>
+      <Toaster />
     </ErrorBoundary>
   );
 }

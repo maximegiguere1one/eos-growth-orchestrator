@@ -4,7 +4,6 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 // Import production configurations
 import { env, checkConfiguration } from '@/config/environment'
@@ -56,11 +55,16 @@ setDevelopmentCSP();
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
+      retry: 2,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
       refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      staleTime: 5 * 60 * 1000, // 5 minutes default
+      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
     },
     mutations: {
-      // Intentionally empty; configure per-mutation as needed
+      retry: 1,
+      retryDelay: 1000,
     },
   },
   
@@ -73,11 +77,37 @@ const queryClient = new QueryClient({
   // },
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Conditionally load React Query Devtools only in development
+const isDevelopment = import.meta.env.DEV;
+
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+
+root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
-      <ReactQueryDevtools initialIsOpen={false} />
+      {isDevelopment && <DevtoolsLoader />}
     </QueryClientProvider>
   </React.StrictMode>,
-)
+);
+
+// Lazy load devtools component only in development
+function DevtoolsLoader() {
+  const [Devtools, setDevtools] = React.useState<React.ComponentType<any> | null>(null);
+
+  React.useEffect(() => {
+    if (isDevelopment) {
+      import('@tanstack/react-query-devtools')
+        .then(({ ReactQueryDevtools }) => {
+          setDevtools(() => ReactQueryDevtools);
+        })
+        .catch((error) => {
+          console.warn('Failed to load React Query Devtools:', error);
+        });
+    }
+  }, []);
+
+  if (!Devtools) return null;
+  
+  return <Devtools initialIsOpen={false} />;
+}

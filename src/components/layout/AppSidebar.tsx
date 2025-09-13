@@ -8,7 +8,8 @@ import {
   Settings,
   BarChart3,
   CheckSquare,
-  Building2
+  Building2,
+  TrendingUp
 } from "lucide-react";
 
 import {
@@ -47,6 +48,12 @@ const navigationItems = [
     url: "/ads",
     icon: Target,
     description: "Campagnes publicitaires"
+  },
+  {
+    title: "Centre de Croissance",
+    url: "/growth",
+    icon: TrendingUp,
+    description: "Suivi croissance EOS"
   }
 ];
 
